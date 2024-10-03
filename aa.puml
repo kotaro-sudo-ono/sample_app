@@ -1,0 +1,42 @@
+@startuml
+entity "ユーザー" as user {
+    +ユーザーID : int
+    +名前 : String
+    +メールアドレス : String
+    +登録日 : Date
+    +役割 : String
+}
+
+entity "弓道場" as dojo {
+    +道場ID : int
+    +道場名 : String
+    +所在地 : String
+}
+
+entity "試合" as match {
+    +試合ID : int
+    +日付 : Date
+    +場所 : String
+    +道場ID : int
+}
+
+entity "チーム" as team {
+    +チームID : int
+    +チーム名 : String
+}
+
+entity "的中記録" as score {
+    +記録ID : int
+    +試合ID : int
+    +チームID : int
+    +ユーザーID : int
+    +的中数 : int
+    +総射数 : int
+}
+
+user -- score : "1対1"  
+match }--{ score : "1対多"  
+team --{ score : "1対1"   
+dojo --{ match : "1対多"  
+user --{ team : "1対多"
+@enduml
