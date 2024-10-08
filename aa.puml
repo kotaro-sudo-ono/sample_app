@@ -1,42 +1,49 @@
 @startuml
 entity "ユーザー" as user {
-    +ユーザーID : int
+    +ユーザーID : uuid
     +名前 : String
     +メールアドレス : String
     +登録日 : Date
-    +役割 : String
+    +役割 : int
+    +チームID:int
+    
 }
 
 entity "弓道場" as dojo {
-    +道場ID : int
+    +道場ID : id
     +道場名 : String
     +所在地 : String
 }
 
 entity "試合" as match {
-    +試合ID : int
+    +試合ID : uuid
     +日付 : Date
-    +場所 : String
-    +道場ID : int
+    +FK"弓道場"道場ID:int
+    +Fk"チーム"チームID:string
+}
+
+entity "チームメンバーテーブル" as team_members{
+    +FK"ユーザID":string
+    +Fk"チームID":string
 }
 
 entity "チーム" as team {
-    +チームID : int
+    +チームID : uuid
     +チーム名 : String
+    +FK”ユーザーID”(チームメンバー): string
 }
 
 entity "的中記録" as score {
-    +記録ID : int
+    +記録ID : uuid
     +試合ID : int
-    +チームID : int
     +ユーザーID : int
     +的中数 : int
     +総射数 : int
 }
 
-user -- score : "1対1"  
-match }--{ score : "1対多"  
-team --{ score : "1対1"   
+user --{ score : "1対多"  
+match }--{ score : "多対多"     
 dojo --{ match : "1対多"  
-user --{ team : "1対多"
+user --{ team_members :"1対多"
+team_members--team :"1対1"
 @enduml
