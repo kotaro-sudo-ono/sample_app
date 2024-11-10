@@ -1,6 +1,6 @@
 @startuml
 entity "ユーザー" as user {
-    +ユーザーID : uuid
+    +ユーザーID : int
     +名前 : String
     +メールアドレス : String
     +登録日 : Date
@@ -16,33 +16,34 @@ entity "弓道場" as dojo {
 }
 
 entity "試合" as match {
-    +試合ID : uuid
+    +試合ID : int
     +日付 : Date
     +FK"弓道場"道場ID:int
-    +Fk"チーム"チームID:string
+    +FK"ユーザID"ユーザID:string
 }
 
 entity "チームメンバーテーブル" as team_members{
+    +"チームメンバーテーブルID":int
     +FK"ユーザID":string
-    +Fk"チームID":string
+    +FK"チームID":string
 }
 
 entity "チーム" as team {
-    +チームID : uuid
+    +チームID : int
     +チーム名 : String
     +FK”ユーザーID”(チームメンバー): string
 }
 
 entity "的中記録" as score {
-    +記録ID : uuid
-    +試合ID : int
-    +ユーザーID : int
+    +記録ID : int
+    +FK"試合"試合ID : int
+    +FK"ユーザーID"ユーザーID : int
     +的中数 : int
     +総射数 : int
 }
 
 user --{ score : "1対多"  
-match }--{ score : "多対多"     
+match }--{ user : "多対多"     
 dojo --{ match : "1対多"  
 user --{ team_members :"1対多"
 team_members--team :"1対1"
