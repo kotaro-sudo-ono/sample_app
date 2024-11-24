@@ -1,0 +1,37 @@
+@startuml aaa
+
+package presetation{
+    class BelongingGroupController{
+        + BelongingGroupResisterService groupResisterService
+        - ResponceEntity<BelongingGroup>(BelongingGroup belongingGroup)
+    }
+}
+
+
+package Domain{
+    package model{
+        class BelongingGroup{
+            - Long groupId
+            - String groupName
+        }
+    }
+package Service{
+    class BelongingGroupResisterService{
+        + BelongingGroupResisterRepository belongingGroupResisterRepository
+        - BelongingGroup resister(BelongingGroup belongingGroup)
+    }
+}
+}
+
+package infrastructure{
+    package external{
+        interface BelongingGroupResisterRepository{
+            BelongingGroupResisterRepository extends jpaRepository<BelongingGroup, Long>
+        }
+    }
+}
+BelongingGroupController --> BelongingGroupResisterService
+BelongingGroupResisterService --> BelongingGroup
+BelongingGroupResisterRepository --|> BelongingGroupResisterService
+
+@enduml
