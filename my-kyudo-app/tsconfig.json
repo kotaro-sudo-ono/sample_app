@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "esnext", // 出力のターゲットバージョン
+    "module": "esnext", // モジュールの形式
+    "moduleResolution": "node", // モジュール解決方法
+    "lib": ["esnext", "dom"], // 使用するライブラリ
+    "allowJs": true, // JSファイルも許可する
+    "jsx": "preserve", // JSXサポート
+    "esModuleInterop": true, // 他のモジュールとのインターフェース
+    "skipLibCheck": true, // ライブラリの型チェックをスキップ
+    "strict": true, // 厳密な型チェック
+    "noImplicitAny": true, // any型を許可しない
+    "forceConsistentCasingInFileNames": true, // ファイル名の大文字小文字の一貫性
+    "outDir": "./dist", // コンパイル後の出力先
+    "rootDir": "./src",
+    "baseUrl": ".", // モジュールの解決ルート
+    "paths": {
+      "@/*": ["src/*"] // エイリアス設定
+    }
+  },
+  "include": [
+    "src/**/*.ts", // 対象ディレクトリ
+    "shims-vue.d.ts", // Vue型定義ファイル
+    "src/**/*.tsx",
+    "src/**/*.vue"
+  ],
+  "exclude": ["node_modules"]
+}
