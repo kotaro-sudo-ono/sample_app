@@ -19,8 +19,8 @@ const draw = () => {
       <v-app-bar-title> Application </v-app-bar-title>
 
       <template v-slot:append>
-        <v-btn to="signIn"> SignIn </v-btn>
-        <v-btn to="login"> LogIn</v-btn>
+        <v-btn to="signUp"> signUp </v-btn>
+        <v-btn to="logIn"> logIn</v-btn>
 
         <v-btn to="/">
           <v-icon> mdi-home </v-icon>
