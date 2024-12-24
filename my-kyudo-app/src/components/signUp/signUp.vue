@@ -62,6 +62,7 @@ const submitForm = async () => {
         <v-form v-model="formIsValid" class="form" @submit.prevent="submitForm">
           <v-text-field
             clearable
+            prepend-inner-icon="mdi-email-outline"
             v-model="email"
             label="Email"
             placeholder="johndoe@gmail.com"
@@ -72,6 +73,7 @@ const submitForm = async () => {
           ></v-text-field>
 
           <v-text-field
+            prepend-inner-icon="mdi-account"
             clearable
             v-model="name"
             label="name"
