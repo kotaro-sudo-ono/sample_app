@@ -1,30 +1,43 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-</script>
+<script setup lang="ts">
+import { ref } from 'vue';
+import Sidebar from './components/app-sidebar/Sidebar.vue';
 
+const drawer = ref(true);
+const draw = () => {
+  drawer.value = !drawer.value;
+  console.log(drawer.value);
+};
+</script>
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+  <v-app>
+    <v-app-bar color="primary">
+      <template v-slot:prepend>
+        <v-icon></v-icon>
+        <v-app-bar-nav-icon @click="draw"></v-app-bar-nav-icon>
+      </template>
+
+      <v-app-bar-title> Application </v-app-bar-title>
+
+      <template v-slot:append>
+        <v-btn to="signUp"> signUp </v-btn>
+        <v-btn to="logIn"> logIn</v-btn>
+
+        <v-btn to="/">
+          <v-icon> mdi-home </v-icon>
+        </v-btn>
+      </template>
+    </v-app-bar>
+
+    <Sidebar v-model="drawer" />
+
+    <v-main class="content">
+      <router-view />
+    </v-main>
+  </v-app>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+<style socpe>
+.content {
+  justify-items: center;
 }
 </style>
