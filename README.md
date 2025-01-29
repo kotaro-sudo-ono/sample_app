@@ -15,5 +15,5 @@
 
 ## 使用手順
 1. >>git clone git@github.com:kotaro-sudo-ono/sample_app.git
-2. >>cd cd my-kyudo-app
+2. >>cd my-kyudo-app
 3. >>yarn install && yarn dev
