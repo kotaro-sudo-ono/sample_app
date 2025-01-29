@@ -17,5 +17,4 @@
 1. >>git clone git@github.com:kotaro-sudo-ono/sample_app.git
 2. >>cd my-kyudo-app
 3. >>yarn install && yarn dev
-   DBの立ち上げ
 4. >>docker-compose up -d
