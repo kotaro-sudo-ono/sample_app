@@ -13,7 +13,7 @@
 - 会場ごとの的中を確認できる
 - 大会で対戦学校との的中の共有がリアルタイムでできる
 
-## 使用手順
+## 使用手順(バックエンドのリポジトリと合わせて使用する)
 1. >>git clone git@github.com:kotaro-sudo-ono/sample_app.git
 2. >>cd my-kyudo-app
 3. >>yarn install && yarn dev
