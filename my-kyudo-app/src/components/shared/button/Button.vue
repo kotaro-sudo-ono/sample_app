@@ -5,7 +5,6 @@ interface Props {
   text: string;
 }
 
-// `props` にデフォルト値を設定
 const props = withDefaults(defineProps<Props>(), {
   disable: false,
   text: '',

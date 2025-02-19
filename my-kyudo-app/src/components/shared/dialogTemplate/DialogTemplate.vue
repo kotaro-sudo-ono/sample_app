@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import Button from './Button.vue';
+import Button from '/Users/opm007852/kotaro.ono/sample_app/my-kyudo-app/src/components/Button.vue';
 
 const showDialog = ref(false);
 
