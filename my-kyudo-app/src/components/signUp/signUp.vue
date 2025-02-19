@@ -1,9 +1,18 @@
 <script setup>
 import { ref } from 'vue';
 import axios from 'axios';
+import PageTemplate from '../shared/pageTemplate/PageTemplate.vue';
+import DialogTemplate from '../shared/dialogTemplate/DialogTemplate.vue';
+import Button from '../shared/button/Button.vue';
 
 const email = ref('');
 const name = ref('');
+const visible = ref(false);
+
+const showDialog = () => {
+  console.log('Button clicked');
+  visible.value = !visible.value;
+};
 
 const nameValid = (value) => {
   return value ? true : '名前を入力してください。';
@@ -53,50 +62,61 @@ const submitForm = async () => {
 </script>
 
 <template>
-  <v-container class="container">
-    <v-row class="main_content">
-      <div class="main_content_set">
-        <v-card-title class="headline">Sign Up</v-card-title>
-        <v-card-subtitle class="text-center">登録情報を入力</v-card-subtitle>
+  <PageTemplate>
+    <template #top-left>
+      <Button v-if="!visible" @click="showDialog" :text="'Sign Upダイアログを開く'" />
+    </template>
+    <template #content-center>
+      <DialogTemplate v-if="visible" :model-value="visible" dialog-title="Sign Up" @cancel="showDialog">
+        <template #content>
+          <v-container class="container">
+            <v-row class="main_content">
+              <div class="main_content_set">
+                <v-card-subtitle class="text-center">登録情報を入力</v-card-subtitle>
 
-        <v-form v-model="formIsValid" class="form" @submit.prevent="submitForm">
-          <v-text-field
-            clearable
-            prepend-inner-icon="mdi-email-outline"
-            v-model="email"
-            label="Email"
-            placeholder="johndoe@gmail.com"
-            type="email"
-            :rules="[rules.counter, rules.email, rules.required]"
-            required
-            outlined
-          ></v-text-field>
+                <v-form v-model="formIsValid" class="form" @submit.prevent="submitForm">
+                  <v-text-field
+                    clearable
+                    prepend-inner-icon="mdi-email-outline"
+                    v-model="email"
+                    label="Email"
+                    placeholder="johndoe@gmail.com"
+                    type="email"
+                    :rules="[rules.counter, rules.email, rules.required]"
+                    required
+                    outlined
+                  ></v-text-field>
 
-          <v-text-field
-            prepend-inner-icon="mdi-account"
-            clearable
-            v-model="name"
-            label="name"
-            type="name"
-            :rules="[nameValid(name)]"
-            required
-            outlined
-          ></v-text-field>
+                  <v-text-field
+                    prepend-inner-icon="mdi-account"
+                    clearable
+                    v-model="name"
+                    label="name"
+                    type="name"
+                    :rules="[nameValid(name)]"
+                    required
+                    outlined
+                  >
+                  </v-text-field>
+                  <v-btn
+                    class="btn"
+                    type="submit"
+                    color="primary"
+                    block
+                    :disabled="!formIsValid"
+                    >Sign In</v-btn
+                  >
+                </v-form>
 
-          <v-btn
-            class="btn"
-            type="submit"
-            color="primary"
-            block
-            :disabled="!formIsValid"
-            >Sign In</v-btn
-          >
-        </v-form>
+                <v-divider></v-divider>
+              </div>
+            </v-row>
+          </v-container>
+        </template>
+      </DialogTemplate>
+    </template>
+  </PageTemplate>
 
-        <v-divider></v-divider>
-      </div>
-    </v-row>
-  </v-container>
 </template>
 
 <style scoped>
