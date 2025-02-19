@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import Dialog from '../Dialog.vue';
+import DialogTemplate from '../shared/dialogTemplate/DialogTemplate.vue';
 import PageTemplate from '../PageTemplate.vue';
 import Button from '../Button.vue';
 
@@ -17,7 +17,7 @@ const openDialog = () => {
       <Button @click="openDialog" :text="'ダイアログを使用する'" />
     </template>
     <template #content-center>
-      <Dialog v-if="visible" />
+      <DialogTemplate v-if="visible" />
     </template>
   </PageTemplate>
 </template>

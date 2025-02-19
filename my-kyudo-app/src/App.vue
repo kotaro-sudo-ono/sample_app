@@ -16,11 +16,11 @@ const draw = () => {
         <v-app-bar-nav-icon @click="draw"></v-app-bar-nav-icon>
       </template>
 
-      <v-app-bar-title> Application </v-app-bar-title>
+      <v-app-bar-title> 的中管理アプリ </v-app-bar-title>
 
       <template v-slot:append>
         <v-btn to="signUp"> signUp </v-btn>
-        <v-btn to="logIn"> logIn</v-btn>
+        <v-btn to="signIn"> signIn</v-btn>
 
         <v-btn to="/">
           <v-icon> mdi-home </v-icon>
@@ -36,7 +36,7 @@ const draw = () => {
   </v-app>
 </template>
 
-<style socpe>
+<style scoped>
 .content {
   justify-items: center;
 }
