@@ -17,8 +17,13 @@
 - ディレクトリ名はキャメルケースで作成
 - ファイル名はパスカルケースで作成
 
-## 使用手順(バックエンドのリポジトリと合わせて使用する)
-1. >>git clone git@github.com:kotaro-sudo-ono/sample_app.git
-2. >>cd my-kyudo-app
-3. >>yarn install && yarn dev
-4. >>docker-compose up -d
+## 環境構築手順(バックエンドのリポジトリと合わせて使用する)
+### vsCode使用の場合（推奨）
+1. >>このリポジトリをクローン
+2. >>$ cd my-kyudo-app
+3. >>画面右下ポップアップの「開発コンテナで再度開く」を押下
+
+### vsCode以外使用の場合
+1. >>このリポジトリをクローン
+2. >>$ cd my-kyudo-app/docker
+3. >>$ docker-compose up -d
