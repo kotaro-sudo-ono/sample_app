@@ -1,0 +1,21 @@
+{
+    "name": "kyudo_app",
+    "dockerComposeFile": [
+      "../docker/docker-compose.yml"
+    ],
+    "service": "app",  // 使用するサービス名（ここでは 'app'）
+    "workspaceFolder": "/app",  // コンテナ内の作業ディレクトリ
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "dbaeumer.vscode-eslint",  // 必要な VSCode 拡張
+          "ms-azuretools.vscode-docker"
+        ]
+      }
+    },
+    "forwardPorts": [5173],  // アプリケーションのポート
+    "postCreateCommand": "yarn install",  // コンテナ作成後に依存関係をインストール
+    "mounts": [
+      "source=${localWorkspaceFolder},target=/app,type=bind"  // ローカルワークスペースをマウント
+    ]
+  }
