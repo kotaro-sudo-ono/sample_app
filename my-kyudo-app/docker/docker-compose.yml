@@ -17,6 +17,14 @@ services:
     dns:
       - 8.8.8.8
       - 8.8.4.4
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 30s  
+      retries: 3     
+      start_period: 10s  
+      timeout: 10s
+    networks:
+      - app-network   
   mysql:
     image: mysql:8.0.33
     container_name: kyudo_app
@@ -35,7 +43,17 @@ services:
     dns:
       - 8.8.8.8
       - 8.8.4.4
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+    networks:
+      - app-network
 volumes:
   mysql-data:
 
-
+networks:
+  app-network:
+    external: true
