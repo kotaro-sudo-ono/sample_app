@@ -51,6 +51,7 @@ services:
       timeout: 10s
     networks:
       - app-network
+    command: --bind-address=0.0.0.0
 volumes:
   mysql-data:
 
