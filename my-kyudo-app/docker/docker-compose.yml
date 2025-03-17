@@ -14,9 +14,6 @@ services:
       - mysql
     env_file:
       - .env 
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5173"]
       interval: 30s  
@@ -40,9 +37,6 @@ services:
       - ../init:/docker-entrypoint-initdb.d
     env_file:
       - .env
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     healthcheck:
       test: ["CMD", "mysqladmin", "ping"]
       interval: 30s
