@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   app:
     build:
@@ -7,13 +9,14 @@ services:
       - "5173:5173"
     volumes:
       - ../:/app
-      - /app/node_modules
+      - node_modules:/app/node_modules  # ← 修正：名前付きボリュームを使用
     environment:
       - NODE_ENV=development
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy  # ← 修正：healthcheckを待つ
     env_file:
-      - .env 
+      - ../.env 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5173"]
       interval: 30s  
@@ -22,6 +25,7 @@ services:
       timeout: 10s
     networks:
       - app-network   
+
   mysql:
     image: mysql:8.0.33
     container_name: kyudo_app
@@ -36,19 +40,22 @@ services:
       - mysql-data:/var/lib/mysql
       - ../init:/docker-entrypoint-initdb.d
     env_file:
-      - .env
+      - ../.env
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 30s
       retries: 3
-      start_period: 10s
+      start_period: 30s  # ← MySQLの起動時間を考慮して延長
       timeout: 10s
     networks:
       - app-network
     command: --bind-address=0.0.0.0
+
 volumes:
   mysql-data:
+  node_modules:  # ← 追加：node_modules用の名前付きボリューム
 
 networks:
   app-network:
-    external: true
+    # external: true  # ← コメントアウト：まず内部ネットワークで試す
+    driver: bridge
