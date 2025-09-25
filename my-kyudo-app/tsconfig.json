@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "esnext", // 出力のターゲットバージョン
     "module": "esnext", // モジュールの形式
-    "moduleResolution": "node", // モジュール解決方法
+    "moduleResolution": "bundler", // モジュール解決方法
     "lib": ["esnext", "dom"], // 使用するライブラリ
     "allowJs": true, // JSファイルも許可する
     "jsx": "preserve", // JSXサポート
