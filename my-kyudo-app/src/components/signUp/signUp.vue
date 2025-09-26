@@ -1,80 +1,32 @@
-<script setup>
-import { ref } from 'vue';
-import axios from 'axios';
+<script setup lang="ts">
+import { computed, ref } from 'vue';
 import PageTemplate from '../shared/pageTemplate/PageTemplate.vue';
 import DialogTemplate from '../shared/dialogTemplate/DialogTemplate.vue';
-import Button from '../shared/button/Button.vue';
+import { useSignUp } from './composable';
 
 const email = ref('');
 const name = ref('');
-const visible = ref(false);
+const passward = ref('');
 
-const showDialog = () => {
-  console.log('Button clicked');
-  visible.value = !visible.value;
-};
+const { submitForm, emailError, nameError, passwordError, showEmailError, showNameError, showPassWardError } =
+  useSignUp(email, name, passward);
 
-const nameValid = (value) => {
-  return value ? true : '名前を入力してください。';
-};
-const rules = {
-  required: (value) => !!value || 'Required.',
-  counter: (value) => value.length <= 20 || 'Max 20 characters',
-  email: (value) => {
-    const pattern =
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return pattern.test(value) || 'Invalid e-mail.';
-  },
-};
-const formIsValid = ref(false);
-
-const submitForm = async () => {
-  const data = {
-    email: email.value,
-    name: name.value,
-  };
-  console.log('date', data);
-
-  try {
-    // Validation
-    if (!email.value || !name.value) {
-      console.log('入力が正しくありません');
-      return;
-    }
-
-    const response = await axios.post(
-      'http://localhost:8081/user/register',
-      data
-    );
-
-    console.log('Logged in successfully:', response.data);
-  } catch (error) {
-    if (error.response) {
-      console.error('Error response:', error.response.data);
-      console.error('Status code:', error.response.status);
-    } else if (error.request) {
-      console.error('Error request:', error.request);
-    } else {
-      console.error('Error:', error.message);
-    }
-  }
-};
+const isButtonDisabled = computed(() => {
+  return !!showEmailError.value || !!showNameError.value || !!showPassWardError.value;
+});
 </script>
 
 <template>
   <PageTemplate>
-    <template #top-left>
-      <Button v-if="!visible" @click="showDialog" :text="'Sign Upダイアログを開く'" />
-    </template>
     <template #content-center>
-      <DialogTemplate v-if="visible" :model-value="visible" dialog-title="Sign Up" @cancel="showDialog">
+      <DialogTemplate :model-value="true" dialog-title="新規登録">
         <template #content>
           <v-container class="container">
             <v-row class="main_content">
               <div class="main_content_set">
                 <v-card-subtitle class="text-center">登録情報を入力</v-card-subtitle>
 
-                <v-form v-model="formIsValid" class="form" @submit.prevent="submitForm">
+                <v-form class="form" @submit.prevent="submitForm">
                   <v-text-field
                     clearable
                     prepend-inner-icon="mdi-email-outline"
@@ -82,9 +34,10 @@ const submitForm = async () => {
                     label="Email"
                     placeholder="johndoe@gmail.com"
                     type="email"
-                    :rules="[rules.counter, rules.email, rules.required]"
                     required
                     outlined
+                    :error="!!emailError"
+                    :error-messages="emailError"
                   ></v-text-field>
 
                   <v-text-field
@@ -93,19 +46,29 @@ const submitForm = async () => {
                     v-model="name"
                     label="name"
                     type="name"
-                    :rules="[nameValid(name)]"
                     required
                     outlined
+                    :error="!!nameError"
+                    :error-messages="nameError"
                   >
                   </v-text-field>
-                  <v-btn
-                    class="btn"
-                    type="submit"
-                    color="primary"
-                    block
-                    :disabled="!formIsValid"
-                    >Sign In</v-btn
+
+                  <v-text-field
+                    prepend-inner-icon="mdi-key-outline"
+                    clearable
+                    v-model="passward"
+                    label="passward"
+                    type="passward"
+                    required
+                    outlined
+                    :error="!!showPassWardError"
+                    :error-messages="passwordError"
                   >
+                  </v-text-field>
+                  <div :class="{ shake: isButtonDisabled }">
+                    <v-btn class="btn" type="submit" color="primary" block>登録</v-btn>
+                    <span v-if="isButtonDisabled" class="error-message"> 入力内容が正しくありません！ </span>
+                  </div>
                 </v-form>
 
                 <v-divider></v-divider>
@@ -113,10 +76,12 @@ const submitForm = async () => {
             </v-row>
           </v-container>
         </template>
+        <template #close>
+          <div />
+        </template>
       </DialogTemplate>
     </template>
   </PageTemplate>
-
 </template>
 
 <style scoped>
@@ -151,5 +116,41 @@ const submitForm = async () => {
 
 :deep(.v-input--density-default .v-field--variant-filled) {
   border-radius: 18px;
+}
+
+.error-message {
+  color: #d32f2f; /* 濃い赤 */
+  font-weight: bold;
+  font-size: 14px;
+  margin-top: 8px;
+  display: block;
+}
+
+.shake {
+  animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  transform: translate3d(0, 0, 0);
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
 }
 </style>

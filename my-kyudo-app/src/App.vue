@@ -5,7 +5,6 @@ import Sidebar from './components/app-sidebar/Sidebar.vue';
 const drawer = ref(true);
 const draw = () => {
   drawer.value = !drawer.value;
-  console.log(drawer.value);
 };
 </script>
 <template>
@@ -19,10 +18,10 @@ const draw = () => {
       <v-app-bar-title> 的中管理アプリ </v-app-bar-title>
 
       <template v-slot:append>
-        <v-btn to="signUp"> signUp </v-btn>
-        <v-btn to="signIn"> signIn</v-btn>
+        <v-btn :to="{ name: 'signUp' }"> 新規登録 </v-btn>
+        <v-btn :to="{ name: 'signIn' }"> ログイン </v-btn>
 
-        <v-btn to="/">
+        <v-btn :to="{ name: 'homeGuest' }">
           <v-icon> mdi-home </v-icon>
         </v-btn>
       </template>
