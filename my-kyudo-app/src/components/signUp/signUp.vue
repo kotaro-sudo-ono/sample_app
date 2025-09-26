@@ -6,13 +6,13 @@ import { useSignUp } from './composable';
 
 const email = ref('');
 const name = ref('');
-const passward = ref('');
+const password = ref('');
 
-const { submitForm, emailError, nameError, passwordError, showEmailError, showNameError, showPassWardError } =
-  useSignUp(email, name, passward);
+const { submitForm, emailError, nameError, passwordError, showEmailError, showNameError, showPasswordError } =
+  useSignUp(email, name, password);
 
 const isButtonDisabled = computed(() => {
-  return !!showEmailError.value || !!showNameError.value || !!showPassWardError.value;
+  return !!showEmailError.value || !!showNameError.value || !!showPasswordError.value;
 });
 </script>
 
@@ -56,12 +56,12 @@ const isButtonDisabled = computed(() => {
                   <v-text-field
                     prepend-inner-icon="mdi-key-outline"
                     clearable
-                    v-model="passward"
-                    label="passward"
-                    type="passward"
+                    v-model="password"
+                    label="password"
+                    type="password"
                     required
                     outlined
-                    :error="!!showPassWardError"
+                    :error="!!showPasswordError"
                     :error-messages="passwordError"
                   >
                   </v-text-field>

@@ -11,7 +11,7 @@ export const useSignUp = (email: Ref<string>, name: Ref<string>, password: Ref<s
   const passwordError = ref('');
   const showEmailError = ref(false);
   const showNameError = ref(false);
-  const showPassWardError = ref(false);
+  const showPasswordError = ref(false);
 
   const emailValidation = (): true | string => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -44,7 +44,7 @@ export const useSignUp = (email: Ref<string>, name: Ref<string>, password: Ref<s
     }
 
     if (!password.value) {
-      showPassWardError.value = true;
+      showPasswordError.value = true;
       setTimeout(() => (showNameError.value = false), 1500);
       passwordError.value = 'パスワードを入力してください';
     }
@@ -61,7 +61,7 @@ export const useSignUp = (email: Ref<string>, name: Ref<string>, password: Ref<s
 
     if (response.status === 200) {
       // 登録成功 → ホーム画面へ遷移
-      router.push({ name: 'home' }); // 名前付きルートの場合
+      router.push({ name: 'signIn' }); // 名前付きルートの場合
       // router.push('/') でもOK（パス指定）
     }
     } catch (error: any) {
@@ -90,6 +90,6 @@ export const useSignUp = (email: Ref<string>, name: Ref<string>, password: Ref<s
     passwordError,
     showEmailError,
     showNameError,
-    showPassWardError,
+    showPasswordError,
   };
 };
