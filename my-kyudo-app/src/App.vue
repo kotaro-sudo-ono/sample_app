@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import Sidebar from './components/app-sidebar/Sidebar.vue';
+import Sidebar from './components/layout/sideBar/Sidebar.vue';
 
 const drawer = ref(true);
 const draw = () => {

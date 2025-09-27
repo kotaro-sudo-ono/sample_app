@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import PageTemplate from '../shared/pageTemplate/PageTemplate.vue';
-import DialogTemplate from '../shared/dialogTemplate/DialogTemplate.vue';
+import PageTemplate from '@/components/layout/pageTemplate/PageTemplate.vue';
+import DialogTemplate from '@/components/ui/dialogTemplate/DialogTemplate.vue';
 import { useSignUp } from './composable';
+import Button from '@/components/ui/button/Button.vue';
 
 const email = ref('');
 const name = ref('');
 const password = ref('');
+const showPassword = ref(false);
 
 const { submitForm, emailError, nameError, passwordError, showEmailError, showNameError, showPasswordError } =
   useSignUp(email, name, password);
@@ -26,7 +28,7 @@ const isButtonDisabled = computed(() => {
               <div class="main_content_set">
                 <v-card-subtitle class="text-center">登録情報を入力</v-card-subtitle>
 
-                <v-form class="form" @submit.prevent="submitForm">
+                <v-form class="form">
                   <v-text-field
                     clearable
                     prepend-inner-icon="mdi-email-outline"
@@ -54,19 +56,15 @@ const isButtonDisabled = computed(() => {
                   </v-text-field>
 
                   <v-text-field
-                    prepend-inner-icon="mdi-key-outline"
-                    clearable
                     v-model="password"
-                    label="password"
-                    type="password"
-                    required
-                    outlined
-                    :error="!!showPasswordError"
-                    :error-messages="passwordError"
-                  >
-                  </v-text-field>
+                    :type="showPassword ? 'text' : 'password'"
+                    label="Password"
+                    prepend-inner-icon="mdi-key-outline"
+                    :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                    @click:append-inner="showPassword = !showPassword"
+                  />
                   <div :class="{ shake: isButtonDisabled }">
-                    <v-btn class="btn" type="submit" color="primary" block>登録</v-btn>
+                    <Button text="登録" @clickButton="submitForm" />
                     <span v-if="isButtonDisabled" class="error-message"> 入力内容が正しくありません！ </span>
                   </div>
                 </v-form>
