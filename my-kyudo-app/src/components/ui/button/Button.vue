@@ -5,12 +5,14 @@ interface Props {
   text?: string;
   disable?: boolean;
   color?: string; // テーマカラー切り替え
+  icon?: string; // 追加: アイコン名（mdi-...）
 }
 
 const props = withDefaults(defineProps<Props>(), {
   text: '',
   disable: false,
   color: 'primary',
+  icon: '', // デフォルトはアイコンなし
 });
 
 const emit = defineEmits<{
@@ -26,14 +28,9 @@ const clickButton = () => {
 </script>
 
 <template>
-  <v-btn
-    block
-    rounded="lg"
-    :color="props.color"
-    :disabled="props.disable"
-    class="main-btn"
-    @click="clickButton"
-  >
+  <v-btn block rounded="lg" :color="props.color" :disabled="props.disable" class="main-btn" @click="clickButton">
+    <!-- アイコンが指定されていれば表示 -->
+    <v-icon v-if="props.icon" left>{{ props.icon }}</v-icon>
     {{ props.text }}
   </v-btn>
 </template>

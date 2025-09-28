@@ -1,6 +1,17 @@
-import { createVuetify } from 'vuetify'
-import 'vuetify/styles'
+import { createVuetify } from 'vuetify';
+import 'vuetify/styles';
 
-const vuetify = createVuetify()
+// Labs カレンダー
+import { VCalendar } from 'vuetify/labs/VCalendar';
+import * as directives from 'vuetify/directives';
+import * as components from 'vuetify/components';
 
-export default vuetify
+const vuetify = createVuetify({
+  components: {
+    ...components,
+    VCalendar,
+  },
+  directives,
+});
+
+export default vuetify;
