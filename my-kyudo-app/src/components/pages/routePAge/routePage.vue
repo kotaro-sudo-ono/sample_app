@@ -7,12 +7,16 @@ const router = useRouter();
 const toRecordCalender = () => {
   router.push({ name: 'recordCalender' });
 };
+
+const toRecordHits = () => {
+  router.push({ name: 'recordHits' });
+};
 </script>
 
 <template>
   <div class="button-group">
-    <Button class="big-btn" text="記録" @click-button="toRecordCalender" />
-    <Button class="big-btn" text="入力" />
+    <Button class="big-btn" text="記録確認" @click-button="toRecordCalender" />
+    <Button class="big-btn" text="記録入力" @click-button="toRecordHits" />
   </div>
 </template>
 
