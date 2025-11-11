@@ -1,22 +1,26 @@
 {
-  "name": "kyudo_app",
-  "dockerComposeFile": ["../../../docker/docker-compose.yml"],
-  "service": "frontend",
-  "workspaceFolder": "/app",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "dbaeumer.vscode-eslint",
-        "ms-azuretools.vscode-docker",
-        "vue.volar",
-        "naumovs.color-highlight",
-        "ms-vscode.vscode-typescript-next",
-        "bradlc.vscode-tailwindcss",
-        "esbenp.prettier-vscode"
-      ]
-    }
-  },
-  "forwardPorts": [5173, 8081, 13306],
-  "postCreateCommand": "yarn install",
-  "mounts": ["source=${localWorkspaceFolder},target=/app,type=bind"]
-}
+    "name": "kyudo_app",
+    "dockerComposeFile": [
+      "../docker/docker-compose.yml"
+    ],
+    "service": "app",  // 使用するサービス名（ここでは 'app'）
+    "workspaceFolder": "/app",  // コンテナ内の作業ディレクトリ
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "dbaeumer.vscode-eslint",  // 必要な VSCode 拡張
+          "ms-azuretools.vscode-docker",
+          "vue.volar",
+          "naumovs.color-highlight",
+          "ms-vscode.vscode-typescript-next",
+          "bradlc.vscode-tailwindcss",
+          "esbenp.prettier-vscode"
+        ]
+      }
+    },
+    "forwardPorts": [5173],  // アプリケーションのポート
+    "postCreateCommand": "yarn install",  // コンテナ作成後に依存関係をインストール
+    "mounts": [
+      "source=${localWorkspaceFolder},target=/app,type=bind"  // ローカルワークスペースをマウント
+    ]
+  }

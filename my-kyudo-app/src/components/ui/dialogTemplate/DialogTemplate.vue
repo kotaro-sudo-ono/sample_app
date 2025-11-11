@@ -60,8 +60,8 @@ const overlayClick = (event: MouseEvent) => {
 <style lang="scss" scoped>
 .overlay {
   position: fixed;
-  width: 100%;
-  height: 100%;
+  width: 75%;
+  height: 75%;
   background: rgba(0, 0, 0, 0.5);
   z-index: 999;
 }
@@ -98,6 +98,9 @@ const overlayClick = (event: MouseEvent) => {
 
 .close {
   flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .shake {
   animation: shakeAnimation 2s infinite;
