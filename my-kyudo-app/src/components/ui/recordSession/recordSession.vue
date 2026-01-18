@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import TargetDialog from '../targetDialog/targetDialog.vue';
+import {  getTypeId, PracticeTypeKey, PracticeTypes } from '@/types/practiceType';
 
 interface Arrow {
   hit: boolean;
@@ -15,7 +16,7 @@ interface Session {
   date: string;
   stands: Stand[];
   notes: string;
-  sessionType: string;
+  sessionTypeId: number;
 }
 
 const emit = defineEmits<{
@@ -26,7 +27,7 @@ const emit = defineEmits<{
 const standCount = ref(1);
 const stands = ref<Stand[]>([{ arrows: Array(4).fill({ hit: false }) }]);
 const notes = ref('');
-const sessionType = ref('練習');
+const sessionTypeId = ref<number>(PracticeTypes.Tournament.id);
 const showSuccess = ref(false);
 
 const dialogOpen = ref(false);
@@ -78,17 +79,21 @@ const setAllHits = (standIndex: number, hits: number) => {
   stands.value = s;
 };
 
+const sessionTypeLabel = computed(() => {
+return Object.values(PracticeTypes).find(p => p.id === sessionTypeId.value)?.label || " ";
+});
+
 // 合計値
 const totalArrows = computed(() => stands.value.reduce((sum, s) => sum + s.arrows.length, 0));
 const totalHits = computed(() => stands.value.reduce((sum, s) => sum + s.arrows.filter((a) => a.hit).length, 0));
 
 // 記録送信
 const handleSubmit = () => {
-  const newSession: Omit<Session, 'id'> = {
+  const newSession: Session = {
     date: new Date().toISOString(),
     stands: stands.value,
     notes: notes.value,
-    sessionType: sessionType.value,
+    sessionTypeId: sessionTypeId.value,
   };
   emit('add-session', newSession);
 
@@ -96,7 +101,7 @@ const handleSubmit = () => {
   standCount.value = 1;
   stands.value = [{ arrows: Array(4).fill({ hit: false }) }];
   notes.value = '';
-  sessionType.value = '練習';
+
 
   showSuccess.value = true;
   setTimeout(() => (showSuccess.value = false), 2000);
@@ -105,17 +110,18 @@ const handleSubmit = () => {
 
 <template>
   <v-card>
-    <v-card-title>練習記録を追加</v-card-title>
+    <v-card-title>{{ sessionTypeLabel }}記録を追加</v-card-title>
     <v-card-subtitle>本日の練習成果を記録しましょう</v-card-subtitle>
 
     <v-card-text>
       <v-form @submit.prevent="handleSubmit" class="form-content">
         <!-- 種別選択 -->
         <v-select
-          v-model="sessionType"
-          :items="['練習', '審査', '大会', 'その他']"
+          v-model="sessionTypeId"
+          :items="Object.values(PracticeTypes).map(p => ({ label: p.label, value: p.id }))"
           label="練習種別"
-          variant="outlined"
+          item-title="label"
+          item-value="value"
         />
 
         <!-- 立数 -->
