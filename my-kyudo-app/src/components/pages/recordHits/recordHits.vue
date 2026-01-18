@@ -16,7 +16,6 @@ const handleSelect = (pos: { x: number; y: number } | undefined) => {
 </script>
 <template>
   <div class="score-page">
-    <recordSheet />
     <RecordSession />
   </div>
 </template>
