@@ -1,22 +1,28 @@
 <script setup lang="ts">
-import recordSheet from './compnents/recordsheet/recordSheet.vue';
 import { ref } from 'vue';
 import RecordSession from '@/components/ui/recordSession/recordSession.vue';
+import { practiceStore } from '@/store/practice';
 
-// 状態（親で管理）
-const dialogOpen = ref(false);
-const savedPosition = ref<{ x: number; y: number } | undefined>(undefined);
+const store = practiceStore();
+const savedMessage = ref('');
 
-// 子コンポーネントから選択結果を受け取る
-const handleSelect = (pos: { x: number; y: number } | undefined) => {
-  if (pos) {
-    savedPosition.value = pos;
-  }
+const handleAddSession = (session: {
+  date: string;
+  stands: { arrows: { hit: boolean; position?: { x: number; y: number } }[] }[];
+  notes: string;
+  sessionTypeId: number;
+}) => {
+  store.addSession(session);
+  savedMessage.value = '記録を保存しました';
+  setTimeout(() => (savedMessage.value = ''), 3000);
 };
 </script>
 <template>
   <div class="score-page">
-    <RecordSession />
+    <v-alert v-if="savedMessage" type="success" variant="tonal" closable class="mb-4">
+      {{ savedMessage }}
+    </v-alert>
+    <RecordSession @add-session="handleAddSession" />
   </div>
 </template>
 <style scoped>

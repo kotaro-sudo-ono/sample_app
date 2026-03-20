@@ -29,7 +29,7 @@ const drawe = defineModel<boolean>();
     <template v-else>
       <v-list-item link :title="'ホーム'" :to="{ name: 'homeDashboard' }" />
       <v-list-item link :title="'記録'" :to="{ name: 'recordCalender' }" />
-      <v-list-item link :title="'入力'" :to="{ name: '' }" />
+      <v-list-item link :title="'入力'" :to="{ name: 'recordHits' }" />
     </template>
   </v-navigation-drawer>
 </template>

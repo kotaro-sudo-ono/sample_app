@@ -25,7 +25,7 @@ const emit = defineEmits<{
 
 
 const standCount = ref(1);
-const stands = ref<Stand[]>([{ arrows: Array(4).fill({ hit: false }) }]);
+const stands = ref<Stand[]>([{ arrows: Array.from({ length: 4 }, () => ({ hit: false })) }]);
 const notes = ref('');
 const sessionTypeId = ref<number>(PracticeTypes.Tournament.id);
 const showSuccess = ref(false);
@@ -36,7 +36,7 @@ const selectedArrow = ref<{ standIndex: number; arrowIndex: number }>();
 
 const addStand = () => {
   standCount.value++;
-  stands.value.push({ arrows: Array(4).fill({ hit: false }) });
+  stands.value.push({ arrows: Array.from({ length: 4 }, () => ({ hit: false })) });
 };
 
 const removeStand = () => {
@@ -59,12 +59,19 @@ const openDialog = (standIndex: number, arrowIndex: number) => {
   dialogOpen.value = true;
 };
 
+const isInsideTarget = (pos: { x: number; y: number }): boolean => {
+  const dx = pos.x - 0.5;
+  const dy = pos.y - 0.5;
+  const targetRadius = 260 / 300 / 2; // 的の外円の半径（正規化座標）
+  return dx * dx + dy * dy <= targetRadius * targetRadius;
+};
+
 const handleSelectPosition = (pos?: { x: number; y: number }) => {
   if (!selectedArrow.value) return;
   const { standIndex, arrowIndex } = selectedArrow.value;
   const s = [...stands.value];
   s[standIndex].arrows[arrowIndex] = {
-    hit: !!pos,
+    hit: !!pos && isInsideTarget(pos),
     position: pos,
   };
   stands.value = s;
@@ -99,7 +106,7 @@ const handleSubmit = () => {
 
   // リセット
   standCount.value = 1;
-  stands.value = [{ arrows: Array(4).fill({ hit: false }) }];
+  stands.value = [{ arrows: Array.from({ length: 4 }, () => ({ hit: false })) }];
   notes.value = '';
 
 
@@ -161,12 +168,12 @@ const handleSubmit = () => {
             <v-btn
               v-for="(arrow, aIndex) in stand.arrows"
               :key="aIndex"
-              :color="arrow.hit ? 'success' : undefined"
-              :variant="arrow.hit ? 'flat' : 'outlined'"
+              :color="arrow.hit ? 'success' : arrow.position ? 'error' : undefined"
+              :variant="arrow.hit || arrow.position ? 'flat' : 'outlined'"
               class="arrow-btn"
               @click="openDialog(sIndex, aIndex)"
             >
-              <v-icon>{{ arrow.hit ? 'mdi-bullseye' : 'mdi-circle-outline' }}</v-icon>
+              <v-icon>{{ arrow.hit ? 'mdi-bullseye' : arrow.position ? 'mdi-close' : 'mdi-circle-outline' }}</v-icon>
               <span>{{ aIndex + 1 }}</span>
             </v-btn>
           </div>
