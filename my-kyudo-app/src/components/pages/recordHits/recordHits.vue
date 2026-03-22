@@ -2,14 +2,11 @@
 import RecordSession from '@/components/ui/recordSession/recordSession.vue';
 import { useRecordHits } from './composable';
 
-const { savedMessage, handleAddSession } = useRecordHits();
+const { handleAddSession } = useRecordHits();
 </script>
 
 <template>
   <div class="score-page">
-    <v-alert v-if="savedMessage" type="success" variant="tonal" closable class="mb-4">
-      {{ savedMessage }}
-    </v-alert>
     <RecordSession @add-session="handleAddSession" />
   </div>
 </template>

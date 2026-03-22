@@ -102,8 +102,8 @@ export const useRecordCalender = (initialMonth?: string) => {
       stands: data.stands,
       notes: data.notes,
       sessionTypeId: data.sessionTypeId,
-      totalArrows: data.stands.reduce((sum, s) => sum + s.arrows.length, 0),
-      totalHits: data.stands.reduce((sum, s) => sum + s.arrows.filter((a) => a.hit).length, 0),
+      totalArrows: data.stands.reduce((sum, stand) => sum + stand.arrows.length, 0),
+      totalHits: data.stands.reduce((sum, stand) => sum + stand.arrows.filter((arrow) => arrow.hit).length, 0),
     });
     stopEdit();
   };
@@ -118,7 +118,9 @@ export const useRecordCalender = (initialMonth?: string) => {
     const token = auth.token;
     if (!token) return null;
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+      const payload = JSON.parse(atob(padded));
       return payload.sub ?? null;
     } catch {
       return null;

@@ -139,9 +139,10 @@ export const practiceStore = defineStore('practice', {
         });
 
         await this.fetchFromBackend(userId);
+        notificationStore().show('記録を保存しました', 'success');
       } catch (error) {
         console.error('[syncToBackend] バックエンドへの送信に失敗しました:', error);
-        this.sessions = this.sessions.filter((s) => s.id !== session.id);
+        this.sessions = this.sessions.filter((existingSession) => existingSession.id !== session.id);
         notificationStore().show('記録の保存に失敗しました。もう一度お試しください。');
       }
     },

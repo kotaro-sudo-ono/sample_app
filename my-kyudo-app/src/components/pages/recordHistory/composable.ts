@@ -28,7 +28,9 @@ export const useRecordHistory = () => {
     const token = auth.token;
     if (!token) return null;
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+      const payload = JSON.parse(atob(padded));
       return payload.sub ?? null;
     } catch {
       return null;
