@@ -148,7 +148,6 @@ export const practiceStore = defineStore('practice', {
     async fetchFromBackend(userId: string) {
       try {
         const res = await fetchRecordsByUser(userId);
-        console.log("res:", res)
         const data = res.data;
 
         if (Array.isArray(data)) {

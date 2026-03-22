@@ -109,10 +109,6 @@ const {
                   <v-icon start>mdi-pencil</v-icon>
                   編集
                 </v-btn>
-                <v-btn size="small" color="error" variant="text" @click="deleteSession(session.id)">
-                  <v-icon start>mdi-delete</v-icon>
-                  削除
-                </v-btn>
               </v-card-actions>
             </v-card>
           </div>
