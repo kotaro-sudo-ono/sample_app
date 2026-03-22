@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import Button from '../button/Button.vue';
+import { useDialogTemplate } from './composable';
 
 const props = defineProps({
   dialogTitle: {
@@ -17,29 +17,12 @@ const emit = defineEmits<{
   cancel: [];
 }>();
 
-const close = () => {
-  emit('cancel');
-};
-
-const triggerShake = ref(false); // 振動状態を管理
-const dialogElement = ref(null); // ダイアログ要素を参照するための変数
-
-// ダイアログ外またはオーバーレイ部分をクリックした場合に振動
-const overlayClick = (event: MouseEvent) => {
-  const target = event.target as HTMLElement;
-  const clickDialogOutside = target.closest('.dialog');
-  if (!clickDialogOutside) {
-    triggerShake.value = true;
-    setTimeout(() => {
-      triggerShake.value = false;
-    }, 500);
-  }
-};
+const { triggerShake, close, overlayClick } = useDialogTemplate(emit);
 </script>
 
 <template>
   <div v-show="modelValue" class="overlay" @click="overlayClick">
-    <div ref="dialogElement" :class="{ dialog: true, shake: triggerShake }">
+    <div :class="{ dialog: true, shake: triggerShake }">
       <div>
         <h2>{{ dialogTitle }}</h2>
       </div>

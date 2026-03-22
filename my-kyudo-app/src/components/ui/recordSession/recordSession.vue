@@ -1,118 +1,36 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import TargetDialog from '../targetDialog/targetDialog.vue';
-import {  getTypeId, PracticeTypeKey, PracticeTypes } from '@/types/practiceType';
-
-interface Arrow {
-  hit: boolean;
-  position?: { x: number; y: number };
-}
-
-interface Stand {
-  arrows: Arrow[];
-}
-
-interface Session {
-  date: string;
-  stands: Stand[];
-  notes: string;
-  sessionTypeId: number;
-}
+import { PracticeTypes } from '@/types/practiceType';
+import { useRecordSession } from './composable';
 
 const emit = defineEmits<{
-  (e: 'add-session', session: Omit<Session, 'id'>): void;
+  (e: 'add-session', session: {
+    date: string;
+    stands: { arrows: { hit: boolean; position?: { x: number; y: number } }[] }[];
+    notes: string;
+    sessionTypeId: number;
+  }): void;
 }>();
 
-
-const standCount = ref(1);
-const stands = ref<Stand[]>([{ arrows: Array.from({ length: 4 }, () => ({ hit: false })) }]);
-const notes = ref('');
-const sessionTypeId = ref<number>(PracticeTypes.Tournament.id);
-const showSuccess = ref(false);
-
-const dialogOpen = ref(false);
-const selectedArrow = ref<{ standIndex: number; arrowIndex: number }>();
-
-
-const addStand = () => {
-  standCount.value++;
-  stands.value.push({ arrows: Array.from({ length: 4 }, () => ({ hit: false })) });
-};
-
-const removeStand = () => {
-  if (standCount.value > 1) {
-    standCount.value--;
-    stands.value.pop();
-  }
-};
-
-const addArrowToStand = (index: number) => {
-  stands.value[index].arrows.push({ hit: false });
-};
-
-const removeArrowFromStand = (index: number) => {
-  if (stands.value[index].arrows.length > 1) stands.value[index].arrows.pop();
-};
-
-const openDialog = (standIndex: number, arrowIndex: number) => {
-  selectedArrow.value = { standIndex, arrowIndex };
-  dialogOpen.value = true;
-};
-
-const isInsideTarget = (pos: { x: number; y: number }): boolean => {
-  const dx = pos.x - 0.5;
-  const dy = pos.y - 0.5;
-  const targetRadius = 260 / 300 / 2; // 的の外円の半径（正規化座標）
-  return dx * dx + dy * dy <= targetRadius * targetRadius;
-};
-
-const handleSelectPosition = (pos?: { x: number; y: number }) => {
-  if (!selectedArrow.value) return;
-  const { standIndex, arrowIndex } = selectedArrow.value;
-  const s = [...stands.value];
-  s[standIndex].arrows[arrowIndex] = {
-    hit: !!pos && isInsideTarget(pos),
-    position: pos,
-  };
-  stands.value = s;
-};
-
-const setAllHits = (standIndex: number, hits: number) => {
-  const s = [...stands.value];
-  s[standIndex].arrows = s[standIndex].arrows.map((_, i) => ({
-    hit: i < hits,
-    position: i < hits ? { x: 0.5, y: 0.5 } : undefined,
-  }));
-  stands.value = s;
-};
-
-const sessionTypeLabel = computed(() => {
-return Object.values(PracticeTypes).find(p => p.id === sessionTypeId.value)?.label || " ";
-});
-
-// 合計値
-const totalArrows = computed(() => stands.value.reduce((sum, s) => sum + s.arrows.length, 0));
-const totalHits = computed(() => stands.value.reduce((sum, s) => sum + s.arrows.filter((a) => a.hit).length, 0));
-
-// 記録送信
-const handleSubmit = () => {
-  const newSession: Session = {
-    date: new Date().toISOString(),
-    stands: stands.value,
-    notes: notes.value,
-    sessionTypeId: sessionTypeId.value,
-  };
-  emit('add-session', newSession);
-
-  // リセット
-  standCount.value = 1;
-  stands.value = [{ arrows: Array.from({ length: 4 }, () => ({ hit: false })) }];
-  notes.value = '';
-
-
-  showSuccess.value = true;
-  setTimeout(() => (showSuccess.value = false), 2000);
-};
+const {
+  standCount,
+  stands,
+  notes,
+  sessionTypeId,
+  showSuccess,
+  dialogOpen,
+  selectedArrow,
+  sessionTypeLabel,
+  totalArrows,
+  totalHits,
+  addStand,
+  removeStand,
+  addArrowToStand,
+  removeArrowFromStand,
+  openDialog,
+  handleSelectPosition,
+  handleSubmit,
+} = useRecordSession(emit);
 </script>
 
 <template>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { defineProps, withDefaults } from 'vue';
 
-interface Props {
+type Props = {
   text?: string;
   disable?: boolean;
   color?: string; // テーマカラー切り替え
   icon?: string; // 追加: アイコン名（mdi-...）
-}
+};
 
 const props = withDefaults(defineProps<Props>(), {
   text: '',

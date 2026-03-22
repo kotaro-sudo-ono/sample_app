@@ -1,88 +1,24 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import Button from '@/components/ui/button/Button.vue';
-import { CalendarTimestamp } from 'vuetify/lib/labs/VCalendar/types.mjs';
 import DialogTemplate from '@/components/ui/dialogTemplate/DialogTemplate.vue';
-import { practiceStore, type PracticeSession } from '@/store/practice';
 import { getTypeName, type PracticeType } from '@/types/practiceType';
+import { useRecordCalender } from './composable';
 
-const store = practiceStore();
-
-// カレンダーの表示タイプ
-const type = ref<'month' | 'week' | 'day'>('month');
-const types = ['month', 'week', 'day'] as const;
-
-// イベント重なりモード
-const mode = ref<'stack' | 'column'>('stack');
-
-// カレンダー表示範囲の日付
-const calendarViewDate = ref<string>('');
-
-// 選択中の日付
-const selectedDate = ref<string | undefined>(undefined);
-const showDialog = computed(() => selectedDate.value !== undefined);
-
-// 選択日のセッション一覧
-const selectedSessions = computed<PracticeSession[]>(() => {
-  if (!selectedDate.value) return [];
-  return store.getSessionsByDate(selectedDate.value);
-});
-
-// 現在表示中の期間
-const currentPeriod = computed(() => {
-  const date = calendarViewDate.value ? new Date(calendarViewDate.value) : new Date();
-  switch (type.value) {
-    case 'month':
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    case 'week':
-    case 'day':
-      return date.toISOString().substring(0, 10);
-  }
-});
-
-// 表示期間を移動する
-const movePeriod = (offset: number) => {
-  const date = new Date(calendarViewDate.value);
-
-  switch (type.value) {
-    case 'month':
-      date.setMonth(date.getMonth() + offset);
-      break;
-    case 'week':
-      date.setDate(date.getDate() + offset * 7);
-      break;
-    case 'day':
-      date.setDate(date.getDate() + offset);
-      break;
-  }
-
-  calendarViewDate.value = date.toISOString().substring(0, 10);
-};
-
-// 日付クリック処理（常に1日だけ選択）
-const onDateClick = (_event: Event, timestamp: CalendarTimestamp) => {
-  if (selectedDate.value === timestamp.date) {
-    selectedDate.value = undefined;
-  } else {
-    selectedDate.value = timestamp.date;
-  }
-};
-
-// ダイアログ閉じる
-const clearSelectDate = () => {
-  selectedDate.value = undefined;
-};
-
-// セッション削除
-const deleteSession = (id: string) => {
-  store.deleteSession(id);
-};
-
-// 的中率フォーマット
-const formatAccuracy = (session: PracticeSession) => {
-  if (session.totalArrows === 0) return '0.0';
-  return ((session.totalHits / session.totalArrows) * 100).toFixed(1);
-};
+const {
+  type,
+  types,
+  mode,
+  calendarViewDate,
+  selectedDate,
+  showDialog,
+  selectedSessions,
+  currentPeriod,
+  movePeriod,
+  onDateClick,
+  clearSelectDate,
+  deleteSession,
+  formatAccuracy,
+} = useRecordCalender();
 </script>
 
 <template>

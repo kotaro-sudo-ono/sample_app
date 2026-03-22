@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { api } from '@/shared/api/api';
+import { saveRecord, fetchRecordsByUser, type SaveArrow, type ArrowRecord } from '@/API/record/recordApi';
 import { authStore } from '@/store/auth';
 
 export interface Arrow {
@@ -54,7 +54,6 @@ export const practiceStore = defineStore('practice', {
       this.sessions.push(newSession);
       this.persistToStorage();
 
-      // バックエンドにも送信を試みる（失敗してもローカルには保存済み）
       console.log('[addSession] syncToBackend を呼び出します。session.id:', newSession.id);
       this.syncToBackend(newSession);
 
@@ -79,8 +78,7 @@ export const practiceStore = defineStore('practice', {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const userId = payload.sub;
 
-        // 矢単位データをフラット化（stand内の矢を連番で管理）
-        const arrows: { arrowNumber: number; positionX?: number; positionY?: number; isHit: boolean }[] = [];
+        const arrows: SaveArrow[] = [];
         let arrowNum = 1;
         session.stands.forEach((stand) => {
           stand.arrows.forEach((arrow) => {
@@ -93,7 +91,7 @@ export const practiceStore = defineStore('practice', {
           });
         });
 
-        await api.post('/record/save', {
+        await saveRecord({
           hitCount: session.totalHits,
           totalShots: session.totalArrows,
           userId,
@@ -108,24 +106,27 @@ export const practiceStore = defineStore('practice', {
     },
     async fetchFromBackend(userId: string) {
       try {
-        const res = await api.get(`/record/user/${userId}`);
-        const data: Array<{
-          recordId: string;
-          hitCount: number;
-          totalShots: number;
-          practiceDate?: string;
-          practiceTypeId?: number;
-          arrows?: Array<{ arrowId: string; arrowNumber: number; positionX?: number; positionY?: number; isHit: boolean }>;
-        }> = res.data;
+        const res = await fetchRecordsByUser(userId);
+        const data = res.data;
 
         if (Array.isArray(data)) {
           data.forEach((record) => {
             const existing = this.sessions.find((s) => s.id === record.recordId);
             if (!existing && record.recordId) {
-              // arrows をstand形式に変換（表示用途のため全矢を1スタンドにまとめる）
-              const stands: Stand[] = record.arrows && record.arrows.length > 0
-                ? [{ arrows: record.arrows.map((a) => ({ hit: a.isHit, position: a.positionX != null && a.positionY != null ? { x: a.positionX, y: a.positionY } : undefined })) }]
-                : [];
+              const stands: Stand[] =
+                record.arrows && record.arrows.length > 0
+                  ? [
+                      {
+                        arrows: record.arrows.map((a: ArrowRecord) => ({
+                          hit: a.isHit,
+                          position:
+                            a.positionX != null && a.positionY != null
+                              ? { x: a.positionX, y: a.positionY }
+                              : undefined,
+                        })),
+                      },
+                    ]
+                  : [];
 
               const backendSession: PracticeSession = {
                 id: record.recordId,

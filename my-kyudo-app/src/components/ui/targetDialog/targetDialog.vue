@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import Button from '../button/Button.vue';
 import DialogTemplate from '../dialogTemplate/DialogTemplate.vue';
+import { useTargetDialog } from './composable';
 
-interface MarkerPosition {
+type MarkerPosition = {
   x: number;
   y: number;
-}
+};
 
-// defineModelで親からopenをバインディング
 const open = defineModel<boolean>('open', { default: false });
 
 const props = defineProps<{
@@ -20,40 +19,8 @@ const emit = defineEmits<{
   (e: 'select', pos?: MarkerPosition): void;
 }>();
 
-const targetRef = ref<HTMLElement>();
-const marker = ref<MarkerPosition>();
-
-// 開いた時に既存位置をセット
-watch(open, (v) => {
-  if (v && props.currentPosition) {
-    marker.value = props.currentPosition;
-  } else if (!v) {
-    marker.value = undefined;
-  }
-});
-
-const handleTargetClick = (e: MouseEvent) => {
-  const el = targetRef.value;
-  if (!el) return;
-  const rect = el.getBoundingClientRect();
-  const x = (e.clientX - rect.left) / rect.width;
-  const y = (e.clientY - rect.top) / rect.height;
-  marker.value = { x, y };
-};
-
-const handleConfirm = () => {
-  emit('select', marker.value);
-  open.value = false;
-};
-
-const handleMiss = () => {
-  emit('select', undefined);
-  open.value = false;
-};
-
-const handleReset = () => {
-  marker.value = undefined;
-};
+const { marker, targetRef, handleTargetClick, handleConfirm, handleMiss, handleReset } =
+  useTargetDialog(open, () => props.currentPosition, emit);
 </script>
 
 <template>

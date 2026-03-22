@@ -1,22 +1,15 @@
 <script setup lang="ts">
 import Button from '@/components/ui/button/Button.vue';
-import { useRouter } from 'vue-router';
+import { useRoutePage } from './composable';
 
-const router = useRouter();
-
-const toRecordCalender = () => {
-  router.push({ name: 'recordCalender' });
-};
-
-const toRecordHits = () => {
-  router.push({ name: 'recordHits' });
-};
+const { toRecordCalender, toRecordHits, toRecordHistory } = useRoutePage();
 </script>
 
 <template>
   <div class="button-group">
     <Button class="big-btn" text="記録確認" @click-button="toRecordCalender" />
     <Button class="big-btn" text="記録入力" @click-button="toRecordHits" />
+    <Button class="big-btn" text="記録を見る" @click-button="toRecordHistory" />
   </div>
 </template>
 
@@ -31,8 +24,8 @@ const toRecordHits = () => {
 .big-btn {
   flex: 1; /* 均等に広がる */
   max-width: 40%; /* 幅は最大40% */
-  height: 160px; /* デカい高さ */
-  font-size: 2rem;
+  height: 80px; /* デカい高さ */
+  font-size: larger;
   font-weight: bold;
   display: flex;
   justify-content: center;
