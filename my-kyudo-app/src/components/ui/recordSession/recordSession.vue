@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import TargetDialog from '../targetDialog/targetDialog.vue';
 import { PracticeTypes } from '@/types/practiceType';
+import type { PracticeSession } from '@/store/practice';
 import { useRecordSession } from './composable';
 
+type StandData = { arrows: { hit: boolean; position?: { x: number; y: number } }[] };
+type SessionData = { date: string; stands: StandData[]; notes: string; sessionTypeId: number };
+
+const props = defineProps<{ editSession?: PracticeSession }>();
+
 const emit = defineEmits<{
-  (e: 'add-session', session: {
-    date: string;
-    stands: { arrows: { hit: boolean; position?: { x: number; y: number } }[] }[];
-    notes: string;
-    sessionTypeId: number;
-  }): void;
+  (e: 'add-session', session: SessionData): void;
+  (e: 'update-session', session: SessionData & { id: string }): void;
 }>();
 
 const {
@@ -30,13 +32,15 @@ const {
   openDialog,
   handleSelectPosition,
   handleSubmit,
-} = useRecordSession(emit);
+} = useRecordSession(emit, props.editSession);
+
+const isEditMode = !!props.editSession;
 </script>
 
 <template>
   <v-card>
-    <v-card-title>{{ sessionTypeLabel }}記録を追加</v-card-title>
-    <v-card-subtitle>本日の練習成果を記録しましょう</v-card-subtitle>
+    <v-card-title>{{ isEditMode ? '記録を編集' : `${sessionTypeLabel}記録を追加` }}</v-card-title>
+    <v-card-subtitle>{{ isEditMode ? '内容を変更して保存してください' : '本日の練習成果を記録しましょう' }}</v-card-subtitle>
 
     <v-card-text>
       <v-form @submit.prevent="handleSubmit" class="form-content">
@@ -125,7 +129,7 @@ const {
         <!-- 送信ボタン -->
         <v-btn type="submit" block color="primary" size="large">
           <v-icon start>{{ showSuccess ? 'mdi-check-circle' : 'mdi-content-save' }}</v-icon>
-          {{ showSuccess ? '記録しました' : '記録を保存' }}
+          {{ isEditMode ? '変更を保存' : showSuccess ? '記録しました' : '記録を保存' }}
         </v-btn>
       </v-form>
     </v-card-text>

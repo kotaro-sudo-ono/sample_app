@@ -41,8 +41,20 @@ export type SaveRecordRequest = {
   arrows: SaveArrow[];
 };
 
+export type UpdateRecordRequest = {
+  hitCount: number;
+  totalShots: number;
+  practiceDate: string;
+  practiceTypeId: number;
+  arrows: SaveArrow[];
+};
+
 export const saveRecord = (data: SaveRecordRequest) => {
   return api.post('/record/save', data);
+};
+
+export const updateRecord = (recordId: string, data: UpdateRecordRequest) => {
+  return api.put(`/record/${recordId}`, data);
 };
 
 export const fetchRecordsByUser = (userId: string) => {

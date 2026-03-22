@@ -1,5 +1,5 @@
 import { ref, computed, onMounted } from 'vue';
-import { practiceStore, type PracticeSession } from '@/store/practice';
+import { practiceStore, type PracticeSession, type Stand } from '@/store/practice';
 import { authStore } from '@/store/auth';
 import type { CalendarTimestamp } from 'vuetify/lib/labs/VCalendar/types.mjs';
 
@@ -85,6 +85,29 @@ export const useRecordCalender = (initialMonth?: string) => {
     store.deleteSession(id);
   };
 
+  const editingSession = ref<PracticeSession | null>(null);
+
+  const startEdit = (session: PracticeSession) => {
+    editingSession.value = session;
+  };
+
+  const stopEdit = () => {
+    editingSession.value = null;
+  };
+
+  const handleUpdateSession = (data: { id: string; date: string; stands: Stand[]; notes: string; sessionTypeId: number }) => {
+    store.updateSession({
+      id: data.id,
+      date: data.date,
+      stands: data.stands,
+      notes: data.notes,
+      sessionTypeId: data.sessionTypeId,
+      totalArrows: data.stands.reduce((sum, s) => sum + s.arrows.length, 0),
+      totalHits: data.stands.reduce((sum, s) => sum + s.arrows.filter((a) => a.hit).length, 0),
+    });
+    stopEdit();
+  };
+
   const formatAccuracy = (session: PracticeSession) => {
     if (session.totalArrows === 0) return '0.0';
     return ((session.totalHits / session.totalArrows) * 100).toFixed(1);
@@ -124,5 +147,9 @@ export const useRecordCalender = (initialMonth?: string) => {
     clearSelectDate,
     deleteSession,
     formatAccuracy,
+    editingSession,
+    startEdit,
+    stopEdit,
+    handleUpdateSession,
   };
 };

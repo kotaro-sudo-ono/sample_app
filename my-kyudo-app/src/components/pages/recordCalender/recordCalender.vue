@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Button from '@/components/ui/button/Button.vue';
 import DialogTemplate from '@/components/ui/dialogTemplate/DialogTemplate.vue';
+import RecordSession from '@/components/ui/recordSession/recordSession.vue';
 import { getTypeName, type PracticeType } from '@/types/practiceType';
 import { useRecordCalender } from './composable';
 
@@ -21,6 +22,10 @@ const {
   clearSelectDate,
   deleteSession,
   formatAccuracy,
+  editingSession,
+  startEdit,
+  stopEdit,
+  handleUpdateSession,
 } = useRecordCalender(props.initialMonth);
 </script>
 
@@ -99,12 +104,39 @@ const {
                   {{ session.notes }}
                 </p>
               </v-card-text>
-
+              <v-card-actions>
+                <v-btn size="small" color="primary" variant="text" @click="startEdit(session)">
+                  <v-icon start>mdi-pencil</v-icon>
+                  編集
+                </v-btn>
+                <v-btn size="small" color="error" variant="text" @click="deleteSession(session.id)">
+                  <v-icon start>mdi-delete</v-icon>
+                  削除
+                </v-btn>
+              </v-card-actions>
             </v-card>
           </div>
         </template>
         <template #close>
           <Button text="閉じる" @click="clearSelectDate" />
+        </template>
+      </DialogTemplate>
+
+      <!-- 編集ダイアログ -->
+      <DialogTemplate
+        :model-value="!!editingSession"
+        dialog-title="記録を編集"
+        @cancel="stopEdit"
+      >
+        <template #content>
+          <RecordSession
+            v-if="editingSession"
+            :edit-session="editingSession"
+            @update-session="handleUpdateSession"
+          />
+        </template>
+        <template #close>
+          <Button text="キャンセル" @click="stopEdit" />
         </template>
       </DialogTemplate>
     </v-sheet>

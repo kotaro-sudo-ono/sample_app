@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { saveRecord, fetchRecordsByUser, type SaveArrow, type ArrowRecord } from '@/API/record/recordApi';
+import { saveRecord, updateRecord, fetchRecordsByUser, type SaveArrow, type ArrowRecord } from '@/API/record/recordApi';
 import { authStore } from '@/store/auth';
 import { notificationStore } from '@/store/notification';
 
@@ -59,6 +59,48 @@ export const practiceStore = defineStore('practice', {
     },
     deleteSession(id: string) {
       this.sessions = this.sessions.filter((s) => s.id !== id);
+    },
+    updateSession(updated: PracticeSession) {
+      const totalArrows = updated.stands.reduce((sum, s) => sum + s.arrows.length, 0);
+      const totalHits = updated.stands.reduce((sum, s) => sum + s.arrows.filter((a) => a.hit).length, 0);
+      const index = this.sessions.findIndex((s) => s.id === updated.id);
+      if (index !== -1) {
+        this.sessions[index] = { ...updated, totalArrows, totalHits };
+      }
+      this.syncUpdateToBackend({ ...updated, totalArrows, totalHits });
+    },
+    async syncUpdateToBackend(session: PracticeSession) {
+      const arrows: SaveArrow[] = [];
+      let arrowNum = 1;
+      session.stands.forEach((stand) => {
+        stand.arrows.forEach((arrow) => {
+          arrows.push({
+            arrowNumber: arrowNum++,
+            positionX: arrow.position?.x,
+            positionY: arrow.position?.y,
+            isHit: arrow.hit,
+          });
+        });
+      });
+      try {
+        await updateRecord(session.id, {
+          hitCount: session.totalHits,
+          totalShots: session.totalArrows,
+          practiceDate: session.date,
+          practiceTypeId: session.sessionTypeId,
+          arrows,
+        });
+        const auth = authStore();
+        const token = auth.token;
+        if (token) {
+          const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+          const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+          const userId = JSON.parse(atob(padded)).sub;
+          await this.fetchFromBackend(userId);
+        }
+      } catch {
+        notificationStore().show('記録の更新に失敗しました。もう一度お試しください。');
+      }
     },
     async syncToBackend(session: PracticeSession) {
       const auth = authStore();

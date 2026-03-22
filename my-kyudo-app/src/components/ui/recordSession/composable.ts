@@ -1,6 +1,6 @@
 import { ref, computed, watch } from 'vue';
 import { PracticeTypes } from '@/types/practiceType';
-import type { Stand } from '@/store/practice';
+import type { PracticeSession, Stand } from '@/store/practice';
 
 type Session = {
   date: string;
@@ -9,13 +9,22 @@ type Session = {
   sessionTypeId: number;
 };
 
-type AddSessionEmit = (e: 'add-session', session: Omit<Session, 'id'>) => void;
+type SessionEmit = {
+  (e: 'add-session', session: Omit<Session, 'id'>): void;
+  (e: 'update-session', session: Session & { id: string }): void;
+};
 
-export const useRecordSession = (emit: AddSessionEmit) => {
-  const standCount = ref(1);
-  const stands = ref<Stand[]>([{ arrows: Array.from({ length: 4 }, () => ({ hit: false })) }]);
-  const notes = ref('');
-  const sessionTypeId = ref<number>(PracticeTypes.Tournament.id);
+export const useRecordSession = (emit: SessionEmit, editSession?: PracticeSession) => {
+  const isEditMode = !!editSession;
+
+  const standCount = ref(isEditMode ? editSession!.stands.length : 1);
+  const stands = ref<Stand[]>(
+    isEditMode
+      ? editSession!.stands.map((s) => ({ arrows: s.arrows.map((a) => ({ ...a })) }))
+      : [{ arrows: Array.from({ length: 4 }, () => ({ hit: false })) }]
+  );
+  const notes = ref(isEditMode ? editSession!.notes : '');
+  const sessionTypeId = ref<number>(isEditMode ? editSession!.sessionTypeId : PracticeTypes.Tournament.id);
   const showSuccess = ref(false);
   const dialogOpen = ref(false);
   const selectedArrow = ref<{ standIndex: number; arrowIndex: number }>();
@@ -99,19 +108,23 @@ export const useRecordSession = (emit: AddSessionEmit) => {
   };
 
   const handleSubmit = () => {
-    const newSession: Session = {
-      date: new Date().toISOString(),
+    const sessionData: Session = {
+      date: isEditMode ? editSession!.date : new Date().toISOString(),
       stands: stands.value,
       notes: notes.value,
       sessionTypeId: sessionTypeId.value,
     };
-    emit('add-session', newSession);
 
-    standCount.value = 1;
-    stands.value = [{ arrows: Array.from({ length: 4 }, () => ({ hit: false })) }];
-    notes.value = '';
-    showSuccess.value = true;
-    setTimeout(() => (showSuccess.value = false), 2000);
+    if (isEditMode) {
+      emit('update-session', { ...sessionData, id: editSession!.id });
+    } else {
+      emit('add-session', sessionData);
+      standCount.value = 1;
+      stands.value = [{ arrows: Array.from({ length: 4 }, () => ({ hit: false })) }];
+      notes.value = '';
+      showSuccess.value = true;
+      setTimeout(() => (showSuccess.value = false), 2000);
+    }
   };
 
   return {
