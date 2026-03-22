@@ -1,11 +1,10 @@
-import axios from 'axios';
-import { Ref, ref, watch } from 'vue';
+import { ref, Ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { register } from '@/API/user/userApi';
 
 export const useSignUp = (email: Ref<string>, name: Ref<string>, password: Ref<string>) => {
-
   const router = useRouter();
-  
+
   const emailError = ref('');
   const nameError = ref('');
   const passwordError = ref('');
@@ -15,15 +14,8 @@ export const useSignUp = (email: Ref<string>, name: Ref<string>, password: Ref<s
 
   const emailValidation = (): true | string => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!email.value) {
-      return 'メールアドレスを入力してください';
-    }
-
-    if (!emailRegex.test(email.value)) {
-      return '有効なメールアドレス形式で入力してください';
-    }
-
+    if (!email.value) return 'メールアドレスを入力してください';
+    if (!emailRegex.test(email.value)) return '有効なメールアドレス形式で入力してください';
     return true;
   };
 
@@ -49,23 +41,13 @@ export const useSignUp = (email: Ref<string>, name: Ref<string>, password: Ref<s
       passwordError.value = 'パスワードを入力してください';
     }
 
-    const data = {
-      email: email.value,
-      name: name.value,
-      password: password.value
-    };
-
     try {
-      const response = await axios.post('http://localhost:8081/user/register', data);
+      const response = await register(email.value, name.value, password.value);
       console.log('登録成功:', response.data);
-
-    if (response.status === 200) {
-      // 登録成功 → ホーム画面へ遷移
-      router.push({ name: 'signIn' }); // 名前付きルートの場合
-      // router.push('/') でもOK（パス指定）
-    }
+      if (response.status === 200) {
+        router.push({ name: 'signIn' });
+      }
     } catch (error: any) {
-      // サーバー側で email が既に存在するとか
       if (error.response?.data?.email) {
         emailError.value = error.response.data.email;
       }
@@ -75,13 +57,8 @@ export const useSignUp = (email: Ref<string>, name: Ref<string>, password: Ref<s
     }
   };
 
-  watch(email, () => {
-    emailError.value = '';
-  });
-
-  watch(name, () => {
-    nameError.value = '';
-  });
+  watch(email, () => { emailError.value = ''; });
+  watch(name, () => { nameError.value = ''; });
 
   return {
     submitForm,

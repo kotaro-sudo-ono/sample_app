@@ -1,36 +1,23 @@
 import { ref, Ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { api } from '@/shared/api/api'; // 共通APIをインポート
+import { login } from '@/API/user/userApi';
 import { authStore } from '@/store/auth';
-
-interface LoginResponse {
-  token: string;
-}
 
 export const useSignIn = (email: Ref<string>, password: Ref<string>) => {
   const router = useRouter();
   const loginError = ref('');
-
   const useAuthStore = authStore();
 
   const loginForm = async () => {
     try {
-      const response = await api.post<LoginResponse>('/user/login', {
-        email: email.value,
-        password: password.value,
-      });
-
+      const response = await login(email.value, password.value);
       const token = response.data.token;
       useAuthStore.login(token);
-
       router.push({ name: 'homeDashboard' });
-    } catch (error) {
+    } catch {
       loginError.value = 'ログインに失敗しました';
     }
   };
 
-  return {
-    loginForm,
-    loginError,
-  };
+  return { loginForm, loginError };
 };

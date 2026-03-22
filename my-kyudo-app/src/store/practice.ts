@@ -1,17 +1,18 @@
 import { defineStore } from 'pinia';
-import { api } from '@/shared/api/api';
+import { saveRecord, updateRecord, fetchRecordsByUser, type SaveArrow, type ArrowRecord } from '@/API/record/recordApi';
 import { authStore } from '@/store/auth';
+import { notificationStore } from '@/store/notification';
 
-export interface Arrow {
+export type Arrow = {
   hit: boolean;
   position?: { x: number; y: number };
-}
+};
 
-export interface Stand {
+export type Stand = {
   arrows: Arrow[];
-}
+};
 
-export interface PracticeSession {
+export type PracticeSession = {
   id: string;
   date: string;
   stands: Stand[];
@@ -19,11 +20,11 @@ export interface PracticeSession {
   sessionTypeId: number;
   totalArrows: number;
   totalHits: number;
-}
+};
 
 export const practiceStore = defineStore('practice', {
   state: () => ({
-    sessions: JSON.parse(localStorage.getItem('practice_sessions') || '[]') as PracticeSession[],
+    sessions: [] as PracticeSession[],
   }),
   getters: {
     getSessions: (state) => state.sessions,
@@ -52,20 +53,58 @@ export const practiceStore = defineStore('practice', {
       };
 
       this.sessions.push(newSession);
-      this.persistToStorage();
-
-      // バックエンドにも送信を試みる（失敗してもローカルには保存済み）
-      console.log('[addSession] syncToBackend を呼び出します。session.id:', newSession.id);
       this.syncToBackend(newSession);
 
       return newSession;
     },
     deleteSession(id: string) {
       this.sessions = this.sessions.filter((s) => s.id !== id);
-      this.persistToStorage();
     },
-    persistToStorage() {
-      localStorage.setItem('practice_sessions', JSON.stringify(this.sessions));
+    updateSession(updated: PracticeSession) {
+      const totalArrows = updated.stands.reduce((sum, stand) => sum + stand.arrows.length, 0);
+      const totalHits = updated.stands.reduce((sum, stand) => sum + stand.arrows.filter((arrow) => arrow.hit).length, 0);
+      const index = this.sessions.findIndex((session) => session.id === updated.id);
+      if (index === -1) return;
+      const previous = this.sessions[index];
+      this.sessions[index] = { ...updated, totalArrows, totalHits };
+      this.syncUpdateToBackend({ ...updated, totalArrows, totalHits }, previous);
+    },
+    async syncUpdateToBackend(session: PracticeSession, previous: PracticeSession) {
+      const arrows: SaveArrow[] = [];
+      let arrowNum = 1;
+      session.stands.forEach((stand) => {
+        stand.arrows.forEach((arrow) => {
+          arrows.push({
+            arrowNumber: arrowNum++,
+            positionX: arrow.position?.x,
+            positionY: arrow.position?.y,
+            isHit: arrow.hit,
+          });
+        });
+      });
+      try {
+        await updateRecord(session.id, {
+          hitCount: session.totalHits,
+          totalShots: session.totalArrows,
+          practiceDate: session.date,
+          practiceTypeId: session.sessionTypeId,
+          arrows,
+        });
+        const auth = authStore();
+        const token = auth.token;
+        if (token) {
+          const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+          const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+          const userId = JSON.parse(atob(padded)).sub;
+          await this.fetchFromBackend(userId);
+        }
+      } catch {
+        const index = this.sessions.findIndex((existingSession) => existingSession.id === previous.id);
+        if (index !== -1) {
+          this.sessions[index] = previous;
+        }
+        notificationStore().show('記録の更新に失敗しました。もう一度お試しください。');
+      }
     },
     async syncToBackend(session: PracticeSession) {
       const auth = authStore();
@@ -75,25 +114,26 @@ export const practiceStore = defineStore('practice', {
         return;
       }
 
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const userId = payload.sub;
+      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+      const payload = JSON.parse(atob(padded));
+      const userId = payload.sub;
 
-        // 矢単位データをフラット化（stand内の矢を連番で管理）
-        const arrows: { arrowNumber: number; positionX?: number; positionY?: number; isHit: boolean }[] = [];
-        let arrowNum = 1;
-        session.stands.forEach((stand) => {
-          stand.arrows.forEach((arrow) => {
-            arrows.push({
-              arrowNumber: arrowNum++,
-              positionX: arrow.position?.x,
-              positionY: arrow.position?.y,
-              isHit: arrow.hit,
-            });
+      const arrows: SaveArrow[] = [];
+      let arrowNum = 1;
+      session.stands.forEach((stand) => {
+        stand.arrows.forEach((arrow) => {
+          arrows.push({
+            arrowNumber: arrowNum++,
+            positionX: arrow.position?.x,
+            positionY: arrow.position?.y,
+            isHit: arrow.hit,
           });
         });
+      });
 
-        await api.post('/record/save', {
+      try {
+        await saveRecord({
           hitCount: session.totalHits,
           totalShots: session.totalArrows,
           userId,
@@ -103,31 +143,43 @@ export const practiceStore = defineStore('practice', {
         });
       } catch (error) {
         console.error('[syncToBackend] バックエンドへの送信に失敗しました:', error);
-        console.warn('ローカルには保存済みです。');
+        this.sessions = this.sessions.filter((existingSession) => existingSession.id !== session.id);
+        notificationStore().show('記録の保存に失敗しました。もう一度お試しください。');
+        return;
+      }
+
+      try {
+        await this.fetchFromBackend(userId);
+        notificationStore().show('記録を保存しました', 'success');
+      } catch {
+        console.warn('[syncToBackend] 保存後のデータ取得に失敗しました。');
       }
     },
     async fetchFromBackend(userId: string) {
       try {
-        const res = await api.get(`/record/user/${userId}`);
-        const data: Array<{
-          recordId: string;
-          hitCount: number;
-          totalShots: number;
-          practiceDate?: string;
-          practiceTypeId?: number;
-          arrows?: Array<{ arrowId: string; arrowNumber: number; positionX?: number; positionY?: number; isHit: boolean }>;
-        }> = res.data;
+        const res = await fetchRecordsByUser(userId);
+        const data = res.data;
 
         if (Array.isArray(data)) {
-          data.forEach((record) => {
-            const existing = this.sessions.find((s) => s.id === record.recordId);
-            if (!existing && record.recordId) {
-              // arrows をstand形式に変換（表示用途のため全矢を1スタンドにまとめる）
-              const stands: Stand[] = record.arrows && record.arrows.length > 0
-                ? [{ arrows: record.arrows.map((a) => ({ hit: a.isHit, position: a.positionX != null && a.positionY != null ? { x: a.positionX, y: a.positionY } : undefined })) }]
-                : [];
+          this.sessions = data
+            .filter((record) => record.recordId)
+            .map((record) => {
+              const stands: Stand[] =
+                record.arrows && record.arrows.length > 0
+                  ? [
+                      {
+                        arrows: record.arrows.map((arrow: ArrowRecord) => ({
+                          hit: arrow.hit,
+                          position:
+                            arrow.positionX != null && arrow.positionY != null
+                              ? { x: arrow.positionX, y: arrow.positionY }
+                              : undefined,
+                        })),
+                      },
+                    ]
+                  : [];
 
-              const backendSession: PracticeSession = {
+              return {
                 id: record.recordId,
                 date: record.practiceDate ?? new Date().toISOString(),
                 stands,
@@ -136,10 +188,7 @@ export const practiceStore = defineStore('practice', {
                 totalArrows: record.totalShots,
                 totalHits: record.hitCount,
               };
-              this.sessions.push(backendSession);
-            }
-          });
-          this.persistToStorage();
+            });
         }
       } catch {
         console.warn('バックエンドからのデータ取得に失敗しました。');

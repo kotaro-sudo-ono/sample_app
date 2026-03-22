@@ -1,124 +1,46 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import TargetDialog from '../targetDialog/targetDialog.vue';
-import {  getTypeId, PracticeTypeKey, PracticeTypes } from '@/types/practiceType';
+import { PracticeTypes } from '@/types/practiceType';
+import type { PracticeSession } from '@/store/practice';
+import { useRecordSession } from './composable';
 
-interface Arrow {
-  hit: boolean;
-  position?: { x: number; y: number };
-}
+type StandData = { arrows: { hit: boolean; position?: { x: number; y: number } }[] };
+type SessionData = { date: string; stands: StandData[]; notes: string; sessionTypeId: number };
 
-interface Stand {
-  arrows: Arrow[];
-}
-
-interface Session {
-  date: string;
-  stands: Stand[];
-  notes: string;
-  sessionTypeId: number;
-}
+const props = defineProps<{ editSession?: PracticeSession }>();
 
 const emit = defineEmits<{
-  (e: 'add-session', session: Omit<Session, 'id'>): void;
+  (e: 'add-session', session: SessionData): void;
+  (e: 'update-session', session: SessionData & { id: string }): void;
 }>();
 
+const {
+  standCount,
+  stands,
+  notes,
+  sessionTypeId,
+  showSuccess,
+  dialogOpen,
+  selectedArrow,
+  sessionTypeLabel,
+  totalArrows,
+  totalHits,
+  addStand,
+  removeStand,
+  addArrowToStand,
+  removeArrowFromStand,
+  openDialog,
+  handleSelectPosition,
+  handleSubmit,
+} = useRecordSession(emit, props.editSession);
 
-const standCount = ref(1);
-const stands = ref<Stand[]>([{ arrows: Array.from({ length: 4 }, () => ({ hit: false })) }]);
-const notes = ref('');
-const sessionTypeId = ref<number>(PracticeTypes.Tournament.id);
-const showSuccess = ref(false);
-
-const dialogOpen = ref(false);
-const selectedArrow = ref<{ standIndex: number; arrowIndex: number }>();
-
-
-const addStand = () => {
-  standCount.value++;
-  stands.value.push({ arrows: Array.from({ length: 4 }, () => ({ hit: false })) });
-};
-
-const removeStand = () => {
-  if (standCount.value > 1) {
-    standCount.value--;
-    stands.value.pop();
-  }
-};
-
-const addArrowToStand = (index: number) => {
-  stands.value[index].arrows.push({ hit: false });
-};
-
-const removeArrowFromStand = (index: number) => {
-  if (stands.value[index].arrows.length > 1) stands.value[index].arrows.pop();
-};
-
-const openDialog = (standIndex: number, arrowIndex: number) => {
-  selectedArrow.value = { standIndex, arrowIndex };
-  dialogOpen.value = true;
-};
-
-const isInsideTarget = (pos: { x: number; y: number }): boolean => {
-  const dx = pos.x - 0.5;
-  const dy = pos.y - 0.5;
-  const targetRadius = 260 / 300 / 2; // 的の外円の半径（正規化座標）
-  return dx * dx + dy * dy <= targetRadius * targetRadius;
-};
-
-const handleSelectPosition = (pos?: { x: number; y: number }) => {
-  if (!selectedArrow.value) return;
-  const { standIndex, arrowIndex } = selectedArrow.value;
-  const s = [...stands.value];
-  s[standIndex].arrows[arrowIndex] = {
-    hit: !!pos && isInsideTarget(pos),
-    position: pos,
-  };
-  stands.value = s;
-};
-
-const setAllHits = (standIndex: number, hits: number) => {
-  const s = [...stands.value];
-  s[standIndex].arrows = s[standIndex].arrows.map((_, i) => ({
-    hit: i < hits,
-    position: i < hits ? { x: 0.5, y: 0.5 } : undefined,
-  }));
-  stands.value = s;
-};
-
-const sessionTypeLabel = computed(() => {
-return Object.values(PracticeTypes).find(p => p.id === sessionTypeId.value)?.label || " ";
-});
-
-// 合計値
-const totalArrows = computed(() => stands.value.reduce((sum, s) => sum + s.arrows.length, 0));
-const totalHits = computed(() => stands.value.reduce((sum, s) => sum + s.arrows.filter((a) => a.hit).length, 0));
-
-// 記録送信
-const handleSubmit = () => {
-  const newSession: Session = {
-    date: new Date().toISOString(),
-    stands: stands.value,
-    notes: notes.value,
-    sessionTypeId: sessionTypeId.value,
-  };
-  emit('add-session', newSession);
-
-  // リセット
-  standCount.value = 1;
-  stands.value = [{ arrows: Array.from({ length: 4 }, () => ({ hit: false })) }];
-  notes.value = '';
-
-
-  showSuccess.value = true;
-  setTimeout(() => (showSuccess.value = false), 2000);
-};
+const isEditMode = !!props.editSession;
 </script>
 
 <template>
   <v-card>
-    <v-card-title>{{ sessionTypeLabel }}記録を追加</v-card-title>
-    <v-card-subtitle>本日の練習成果を記録しましょう</v-card-subtitle>
+    <v-card-title>{{ isEditMode ? '記録を編集' : `${sessionTypeLabel}記録を追加` }}</v-card-title>
+    <v-card-subtitle>{{ isEditMode ? '内容を変更して保存してください' : '本日の練習成果を記録しましょう' }}</v-card-subtitle>
 
     <v-card-text>
       <v-form @submit.prevent="handleSubmit" class="form-content">
@@ -207,7 +129,7 @@ const handleSubmit = () => {
         <!-- 送信ボタン -->
         <v-btn type="submit" block color="primary" size="large">
           <v-icon start>{{ showSuccess ? 'mdi-check-circle' : 'mdi-content-save' }}</v-icon>
-          {{ showSuccess ? '記録しました' : '記録を保存' }}
+          {{ isEditMode ? '変更を保存' : showSuccess ? '記録しました' : '記録を保存' }}
         </v-btn>
       </v-form>
     </v-card-text>
@@ -218,7 +140,7 @@ const handleSubmit = () => {
     v-model:open="dialogOpen"
     v-if="selectedArrow"
     :arrow-number="selectedArrow.arrowIndex + 1"
-    :current-position="stands[selectedArrow.standIndex].arrows[selectedArrow.arrowIndex].position"
+    :current-position="stands[selectedArrow.standIndex]?.arrows[selectedArrow.arrowIndex]?.position"
     @select="handleSelectPosition"
   />
 </template>
