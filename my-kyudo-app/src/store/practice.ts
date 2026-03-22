@@ -70,18 +70,15 @@ export const practiceStore = defineStore('practice', {
       this.syncUpdateToBackend({ ...updated, totalArrows, totalHits }, previous);
     },
     async syncUpdateToBackend(session: PracticeSession, previous: PracticeSession) {
-      const arrows: SaveArrow[] = [];
-      let arrowNum = 1;
-      session.stands.forEach((stand) => {
-        stand.arrows.forEach((arrow) => {
-          arrows.push({
-            arrowNumber: arrowNum++,
-            positionX: arrow.position?.x,
-            positionY: arrow.position?.y,
-            isHit: arrow.hit,
-          });
-        });
-      });
+      const arrows: SaveArrow[] = session.stands.flatMap((stand, standIndex) =>
+        stand.arrows.map((arrow, arrowIndex) => ({
+          arrowNumber: arrowIndex + 1,
+          standNumber: standIndex + 1,
+          positionX: arrow.position?.x,
+          positionY: arrow.position?.y,
+          isHit: arrow.hit,
+        }))
+      );
       try {
         await updateRecord(session.id, {
           hitCount: session.totalHits,
@@ -119,18 +116,15 @@ export const practiceStore = defineStore('practice', {
       const payload = JSON.parse(atob(padded));
       const userId = payload.sub;
 
-      const arrows: SaveArrow[] = [];
-      let arrowNum = 1;
-      session.stands.forEach((stand) => {
-        stand.arrows.forEach((arrow) => {
-          arrows.push({
-            arrowNumber: arrowNum++,
-            positionX: arrow.position?.x,
-            positionY: arrow.position?.y,
-            isHit: arrow.hit,
-          });
-        });
-      });
+      const arrows: SaveArrow[] = session.stands.flatMap((stand, standIndex) =>
+        stand.arrows.map((arrow, arrowIndex) => ({
+          arrowNumber: arrowIndex + 1,
+          standNumber: standIndex + 1,
+          positionX: arrow.position?.x,
+          positionY: arrow.position?.y,
+          isHit: arrow.hit,
+        }))
+      );
 
       try {
         await saveRecord({
@@ -164,20 +158,30 @@ export const practiceStore = defineStore('practice', {
           this.sessions = data
             .filter((record) => record.recordId)
             .map((record) => {
-              const stands: Stand[] =
-                record.arrows && record.arrows.length > 0
-                  ? [
-                      {
-                        arrows: record.arrows.map((arrow: ArrowRecord) => ({
-                          hit: arrow.hit,
-                          position:
-                            arrow.positionX != null && arrow.positionY != null
-                              ? { x: arrow.positionX, y: arrow.positionY }
-                              : undefined,
-                        })),
-                      },
-                    ]
-                  : [];
+              const stands: Stand[] = (() => {
+                if (!record.arrows || record.arrows.length === 0) return [];
+                const standMap = new Map<number, Arrow[]>();
+                const sortedArrows = [...record.arrows].sort((a, b) => {
+                  const snA = a.standNumber ?? 1;
+                  const snB = b.standNumber ?? 1;
+                  if (snA !== snB) return snA - snB;
+                  return a.arrowNumber - b.arrowNumber;
+                });
+                for (const arrow of sortedArrows) {
+                  const sn = arrow.standNumber ?? 1;
+                  if (!standMap.has(sn)) standMap.set(sn, []);
+                  standMap.get(sn)!.push({
+                    hit: arrow.hit,
+                    position:
+                      arrow.positionX != null && arrow.positionY != null
+                        ? { x: arrow.positionX, y: arrow.positionY }
+                        : undefined,
+                  });
+                }
+                return Array.from(standMap.entries())
+                  .sort((a, b) => a[0] - b[0])
+                  .map(([, arrows]) => ({ arrows }));
+              })();
 
               return {
                 id: record.recordId,

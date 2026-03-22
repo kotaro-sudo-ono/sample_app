@@ -24,7 +24,7 @@ const { marker, targetRef, handleTargetClick, handleConfirm, handleMiss, handleR
 </script>
 
 <template>
-  <DialogTemplate v-model="open" :dialogTitle="`${props.arrowNumber}本目の的中位置`" @cancel="open = false">
+  <DialogTemplate v-model="open" :width="100" :dialogTitle="`${props.arrowNumber}本目の的中位置`" @cancel="open = false">
     <template #content>
       <p>的をクリックして矢が当たった位置を記録してください。</p>
 
@@ -164,6 +164,8 @@ const { marker, targetRef, handleTargetClick, handleConfirm, handleMiss, handleR
   }
 }
 .text-row {
+  display: flex;
+  flex-direction: column;
   gap: 2px;
 }
 </style>

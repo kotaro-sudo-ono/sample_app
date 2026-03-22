@@ -56,15 +56,23 @@ const {
         :event-overlap-threshold="30"
         :events="calendarEvents"
         @click:date="onDateClick"
-      />
+      >
+        <template #event="{ event }">
+          <div class="rate-event" :style="{ background: event.color }">
+            {{ event.title }}
+          </div>
+        </template>
+      </v-calendar>
 
       <!-- 記録詳細ダイアログ -->
       <DialogTemplate
+        :width="90"
         :model-value="showDialog"
         :dialog-title="selectedDate ? `${selectedDate} の記録` : '記録'"
         @cancel="clearSelectDate"
+        
       >
-        <template #content>
+        <template #content >
           <div v-if="selectedSessions.length === 0" class="no-records">
             <v-icon size="48" color="grey">mdi-note-off-outline</v-icon>
             <p>この日の記録はありません</p>
@@ -119,6 +127,7 @@ const {
 
       <!-- 編集ダイアログ -->
       <DialogTemplate
+        :width="90"
         :model-value="!!editingSession"
         dialog-title="記録を編集"
         @cancel="stopEdit"
@@ -172,6 +181,15 @@ const {
 
 .type-select {
   flex: 0 0 120px;
+}
+
+.dialog-main {
+  width: 90%;
+}
+
+.rate-event {
+  display: flex;
+  justify-content: center;
 }
 
 /* 選択日の丸ハイライトを消す */

@@ -2,6 +2,12 @@ import { ref, computed, watch } from 'vue';
 import { PracticeTypes } from '@/types/practiceType';
 import type { PracticeSession, Stand } from '@/store/practice';
 
+const nowJST = () => {
+  const now = new Date();
+  const jstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  return jstDate.toISOString().replace('Z', '+09:00');
+};
+
 type Session = {
   date: string;
   stands: Stand[];
@@ -109,7 +115,7 @@ export const useRecordSession = (emit: SessionEmit, editSession?: PracticeSessio
 
   const handleSubmit = () => {
     const sessionData: Session = {
-      date: isEditMode ? editSession!.date : new Date().toISOString(),
+      date: isEditMode ? editSession!.date : nowJST(),
       stands: stands.value,
       notes: notes.value,
       sessionTypeId: sessionTypeId.value,

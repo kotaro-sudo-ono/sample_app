@@ -10,7 +10,8 @@ export const useRecordCalender = (initialMonth?: string) => {
   const types = ['month', 'week', 'day'] as const;
   const mode = ref<'stack' | 'column'>('stack');
 
-  const initialDate = initialMonth ? `${initialMonth}-01` : new Date().toISOString().substring(0, 10);
+  const nowJSTDate = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().substring(0, 10);
+  const initialDate = initialMonth ? `${initialMonth}-01` : nowJSTDate;
   const calendarViewDate = ref<string>(initialDate);
   const selectedDate = ref<string | undefined>(undefined);
 
