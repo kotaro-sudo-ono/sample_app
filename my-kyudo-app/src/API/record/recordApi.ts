@@ -12,7 +12,7 @@ export type ArrowRecord = {
   arrowNumber: number;
   positionX?: number;
   positionY?: number;
-  isHit: boolean;
+  hit: boolean;
 };
 
 export type RecordItem = {
@@ -49,6 +49,8 @@ export const fetchRecordsByUser = (userId: string) => {
   return api.get<RecordItem[]>(`/record/user/${userId}`);
 };
 
-export const fetchMonthlySummaryByUser = (userId: string) => {
-  return api.get<MonthlySummary[]>(`/record/user/${userId}/monthly-summary`);
+export const fetchMonthlySummaryByUser = (userId: string, months: string[]) => {
+  const params = new URLSearchParams();
+  months.forEach((m) => params.append('months', m));
+  return api.get<MonthlySummary[]>(`/record/user/${userId}/monthly-summary?${params.toString()}`);
 };

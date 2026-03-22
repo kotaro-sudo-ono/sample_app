@@ -4,6 +4,8 @@ import DialogTemplate from '@/components/ui/dialogTemplate/DialogTemplate.vue';
 import { getTypeName, type PracticeType } from '@/types/practiceType';
 import { useRecordCalender } from './composable';
 
+const props = defineProps<{ initialMonth?: string }>();
+
 const {
   type,
   types,
@@ -11,6 +13,7 @@ const {
   calendarViewDate,
   selectedDate,
   showDialog,
+  calendarEvents,
   selectedSessions,
   currentPeriod,
   movePeriod,
@@ -18,7 +21,7 @@ const {
   clearSelectDate,
   deleteSession,
   formatAccuracy,
-} = useRecordCalender();
+} = useRecordCalender(props.initialMonth);
 </script>
 
 <template>
@@ -47,7 +50,7 @@ const {
         :type="type"
         :event-overlap-mode="mode"
         :event-overlap-threshold="30"
-        :events="[]"
+        :events="calendarEvents"
         @click:date="onDateClick"
       />
 
@@ -96,17 +99,7 @@ const {
                   {{ session.notes }}
                 </p>
               </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  size="small"
-                  color="error"
-                  variant="text"
-                  @click="deleteSession(session.id)"
-                >
-                  <v-icon start>mdi-delete</v-icon>
-                  削除
-                </v-btn>
-              </v-card-actions>
+
             </v-card>
           </div>
         </template>

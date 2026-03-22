@@ -106,6 +106,7 @@ export const practiceStore = defineStore('practice', {
     async fetchFromBackend(userId: string) {
       try {
         const res = await fetchRecordsByUser(userId);
+        console.log("res:", res)
         const data = res.data;
 
         if (Array.isArray(data)) {
@@ -116,11 +117,11 @@ export const practiceStore = defineStore('practice', {
                 record.arrows && record.arrows.length > 0
                   ? [
                       {
-                        arrows: record.arrows.map((a: ArrowRecord) => ({
-                          hit: a.isHit,
+                        arrows: record.arrows.map((arrow: ArrowRecord) => ({
+                          hit: arrow.hit,
                           position:
-                            a.positionX != null && a.positionY != null
-                              ? { x: a.positionX, y: a.positionY }
+                            arrow.positionX != null && arrow.positionY != null
+                              ? { x: arrow.positionX, y: arrow.positionY }
                               : undefined,
                         })),
                       },

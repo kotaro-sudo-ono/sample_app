@@ -1,17 +1,41 @@
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { practiceStore, type PracticeSession } from '@/store/practice';
+import { authStore } from '@/store/auth';
 import type { CalendarTimestamp } from 'vuetify/lib/labs/VCalendar/types.mjs';
 
-export const useRecordCalender = () => {
+export const useRecordCalender = (initialMonth?: string) => {
   const store = practiceStore();
 
   const type = ref<'month' | 'week' | 'day'>('month');
   const types = ['month', 'week', 'day'] as const;
   const mode = ref<'stack' | 'column'>('stack');
-  const calendarViewDate = ref<string>('');
+
+  const initialDate = initialMonth ? `${initialMonth}-01` : new Date().toISOString().substring(0, 10);
+  const calendarViewDate = ref<string>(initialDate);
   const selectedDate = ref<string | undefined>(undefined);
 
   const showDialog = computed(() => selectedDate.value !== undefined);
+
+  const calendarEvents = computed(() => {
+    const dateMap = new Map<string, { hits: number; arrows: number }>();
+    store.sessions.forEach((session) => {
+      const date = session.date.substring(0, 10);
+      const existing = dateMap.get(date) ?? { hits: 0, arrows: 0 };
+      dateMap.set(date, {
+        hits: existing.hits + session.totalHits,
+        arrows: existing.arrows + session.totalArrows,
+      });
+    });
+    return Array.from(dateMap.entries()).map(([date, { hits, arrows }]) => {
+      const rate = arrows > 0 ? Math.round((hits / arrows) * 100) : 0;
+      return {
+        title: `${rate}%`,
+        start: date,
+        end: date,
+        color: rate >= 70 ? 'green' : rate >= 50 ? 'orange' : 'red',
+      };
+    });
+  });
 
   const selectedSessions = computed<PracticeSession[]>(() => {
     if (!selectedDate.value) return [];
@@ -66,6 +90,25 @@ export const useRecordCalender = () => {
     return ((session.totalHits / session.totalArrows) * 100).toFixed(1);
   };
 
+  const getUserId = (): string | null => {
+    const auth = authStore();
+    const token = auth.token;
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.sub ?? null;
+    } catch {
+      return null;
+    }
+  };
+
+  onMounted(async () => {
+    const userId = getUserId();
+    if (userId) {
+      await store.fetchFromBackend(userId);
+    }
+  });
+
   return {
     type,
     types,
@@ -73,6 +116,7 @@ export const useRecordCalender = () => {
     calendarViewDate,
     selectedDate,
     showDialog,
+    calendarEvents,
     selectedSessions,
     currentPeriod,
     movePeriod,

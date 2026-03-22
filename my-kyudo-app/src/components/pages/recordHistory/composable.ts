@@ -1,18 +1,27 @@
 import { ref, onMounted } from 'vue';
-import {
-  fetchMonthlySummaryByUser,
-  fetchRecordsByUser,
-  type MonthlySummary,
-  type RecordItem,
-} from '@/API/record/recordApi';
+import { fetchMonthlySummaryByUser, type MonthlySummary } from '@/API/record/recordApi';
 import { authStore } from '@/store/auth';
 
+type View = 'summary' | 'calendar';
+
+type PeriodOption = {
+  label: string;
+  value: number;
+};
+
 export const useRecordHistory = () => {
-  const activeTab = ref<'summary' | 'history'>('summary');
+  const view = ref<View>('summary');
+  const selectedMonth = ref<string>('');
   const monthlySummaries = ref<MonthlySummary[]>([]);
-  const records = ref<RecordItem[]>([]);
   const loading = ref(false);
   const errorMessage = ref('');
+
+  const periodOptions: PeriodOption[] = [
+    { label: '直近3ヶ月', value: 3 },
+    { label: '直近6ヶ月', value: 6 },
+    { label: '直近12ヶ月', value: 12 },
+  ];
+  const selectedPeriod = ref(3);
 
   const getUserId = (): string | null => {
     const auth = authStore();
@@ -26,30 +35,27 @@ export const useRecordHistory = () => {
     }
   };
 
-  const formatMonth = (month: string): string => {
-    const [year, mon] = month.split('-');
-    return `${year}年${parseInt(mon)}月`;
+  const generateMonthList = (months: number): string[] => {
+    const result: string[] = [];
+    const now = new Date();
+    for (let i = 0; i < months; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      result.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+    return result;
   };
 
-  const formatDate = (dateStr?: string): string => {
-    if (!dateStr) return '不明';
-    const d = new Date(dateStr);
-    return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
-  };
-
-  const formatHitRate = (hitRate: number): string => {
-    return `${Math.round(hitRate * 100)}%`;
-  };
-
-  const fetchMonthlySummary = async () => {
+  const fetchSummary = async () => {
     const userId = getUserId();
     if (!userId) {
       errorMessage.value = 'ログインしてください';
       return;
     }
     loading.value = true;
+    errorMessage.value = '';
     try {
-      const res = await fetchMonthlySummaryByUser(userId);
+      const months = generateMonthList(selectedPeriod.value);
+      const res = await fetchMonthlySummaryByUser(userId, months);
       monthlySummaries.value = res.data;
     } catch {
       errorMessage.value = 'サマリーの取得に失敗しました';
@@ -58,40 +64,41 @@ export const useRecordHistory = () => {
     }
   };
 
-  const fetchRecords = async () => {
-    const userId = getUserId();
-    if (!userId) {
-      errorMessage.value = 'ログインが必要です';
-      return;
-    }
-    loading.value = true;
-    try {
-      const res = await fetchRecordsByUser(userId);
-      records.value = res.data.slice().sort((a, b) => {
-        const da = a.practiceDate ? new Date(a.practiceDate).getTime() : 0;
-        const db = b.practiceDate ? new Date(b.practiceDate).getTime() : 0;
-        return db - da;
-      });
-    } catch {
-      errorMessage.value = '履歴の取得に失敗しました';
-    } finally {
-      loading.value = false;
-    }
+  const formatMonth = (month: string): string => {
+    const [year, mon] = month.split('-');
+    return `${year}年${parseInt(mon)}月`;
+  };
+
+  const formatHitRate = (hitRate: number): string => {
+    return `${Math.round(hitRate * 100)}%`;
+  };
+
+  const onMonthClick = (month: string) => {
+    selectedMonth.value = month;
+    view.value = 'calendar';
+  };
+
+  const backToSummary = () => {
+    view.value = 'summary';
+    selectedMonth.value = '';
   };
 
   onMounted(() => {
-    fetchMonthlySummary();
-    fetchRecords();
+    fetchSummary();
   });
 
   return {
-    activeTab,
+    view,
+    selectedMonth,
     monthlySummaries,
-    records,
     loading,
     errorMessage,
+    periodOptions,
+    selectedPeriod,
+    fetchSummary,
     formatMonth,
-    formatDate,
     formatHitRate,
+    onMonthClick,
+    backToSummary,
   };
 };
