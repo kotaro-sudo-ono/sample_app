@@ -20,7 +20,6 @@ const {
   movePeriod,
   onDateClick,
   clearSelectDate,
-  deleteSession,
   formatAccuracy,
   editingSession,
   startEdit,
@@ -114,7 +113,7 @@ const {
           </div>
         </template>
         <template #close>
-          <Button text="閉じる" @click="clearSelectDate" />
+          <Button text="閉じる" @clickButton="clearSelectDate" />
         </template>
       </DialogTemplate>
 
@@ -132,7 +131,7 @@ const {
           />
         </template>
         <template #close>
-          <Button text="キャンセル" @click="stopEdit" />
+          <Button text="キャンセル" @clickButton="stopEdit" />
         </template>
       </DialogTemplate>
     </v-sheet>
