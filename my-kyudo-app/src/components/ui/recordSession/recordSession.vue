@@ -136,7 +136,7 @@ const {
     v-model:open="dialogOpen"
     v-if="selectedArrow"
     :arrow-number="selectedArrow.arrowIndex + 1"
-    :current-position="stands[selectedArrow.standIndex].arrows[selectedArrow.arrowIndex].position"
+    :current-position="stands[selectedArrow.standIndex]?.arrows[selectedArrow.arrowIndex]?.position"
     @select="handleSelectPosition"
   />
 </template>

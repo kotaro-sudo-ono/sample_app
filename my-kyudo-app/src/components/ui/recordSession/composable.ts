@@ -1,6 +1,6 @@
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { PracticeTypes } from '@/types/practiceType';
-import type { Arrow, Stand } from '@/store/practice';
+import type { Stand } from '@/store/practice';
 
 type Session = {
   date: string;
@@ -37,6 +37,10 @@ export const useRecordSession = (emit: AddSessionEmit) => {
     if (standCount.value > 1) {
       standCount.value--;
       stands.value.pop();
+      if (selectedArrow.value && selectedArrow.value.standIndex >= stands.value.length) {
+        selectedArrow.value = undefined;
+        dialogOpen.value = false;
+      }
     }
   };
 
@@ -45,8 +49,22 @@ export const useRecordSession = (emit: AddSessionEmit) => {
   };
 
   const removeArrowFromStand = (index: number) => {
-    if (stands.value[index].arrows.length > 1) stands.value[index].arrows.pop();
+    if (stands.value[index].arrows.length > 1) {
+      stands.value[index].arrows.pop();
+      if (
+        selectedArrow.value &&
+        selectedArrow.value.standIndex === index &&
+        selectedArrow.value.arrowIndex >= stands.value[index].arrows.length
+      ) {
+        selectedArrow.value = undefined;
+        dialogOpen.value = false;
+      }
+    }
   };
+
+  watch(dialogOpen, (isOpen) => {
+    if (!isOpen) selectedArrow.value = undefined;
+  });
 
   const openDialog = (standIndex: number, arrowIndex: number) => {
     selectedArrow.value = { standIndex, arrowIndex };

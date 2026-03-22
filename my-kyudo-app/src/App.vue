@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { authStore } from './store/auth';
 import Sidebar from './components/layout/sideBar/Sidebar.vue';
+import GlobalSnackbar from './components/ui/globalSnackbar/GlobalSnackbar.vue';
 import { useRouter } from 'vue-router';
 
 const useAuthStore = authStore();
@@ -51,6 +52,8 @@ const logout = () => {
     <v-main class="content">
       <router-view />
     </v-main>
+
+    <GlobalSnackbar />
   </v-app>
 </template>
 

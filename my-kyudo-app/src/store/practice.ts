@@ -1,17 +1,18 @@
 import { defineStore } from 'pinia';
 import { saveRecord, fetchRecordsByUser, type SaveArrow, type ArrowRecord } from '@/API/record/recordApi';
 import { authStore } from '@/store/auth';
+import { notificationStore } from '@/store/notification';
 
-export interface Arrow {
+export type Arrow = {
   hit: boolean;
   position?: { x: number; y: number };
-}
+};
 
-export interface Stand {
+export type Stand = {
   arrows: Arrow[];
-}
+};
 
-export interface PracticeSession {
+export type PracticeSession = {
   id: string;
   date: string;
   stands: Stand[];
@@ -19,11 +20,11 @@ export interface PracticeSession {
   sessionTypeId: number;
   totalArrows: number;
   totalHits: number;
-}
+};
 
 export const practiceStore = defineStore('practice', {
   state: () => ({
-    sessions: JSON.parse(localStorage.getItem('practice_sessions') || '[]') as PracticeSession[],
+    sessions: [] as PracticeSession[],
   }),
   getters: {
     getSessions: (state) => state.sessions,
@@ -52,19 +53,12 @@ export const practiceStore = defineStore('practice', {
       };
 
       this.sessions.push(newSession);
-      this.persistToStorage();
-
-      console.log('[addSession] syncToBackend を呼び出します。session.id:', newSession.id);
       this.syncToBackend(newSession);
 
       return newSession;
     },
     deleteSession(id: string) {
       this.sessions = this.sessions.filter((s) => s.id !== id);
-      this.persistToStorage();
-    },
-    persistToStorage() {
-      localStorage.setItem('practice_sessions', JSON.stringify(this.sessions));
     },
     async syncToBackend(session: PracticeSession) {
       const auth = authStore();
@@ -75,7 +69,9 @@ export const practiceStore = defineStore('practice', {
       }
 
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+        const payload = JSON.parse(atob(padded));
         const userId = payload.sub;
 
         const arrows: SaveArrow[] = [];
@@ -99,9 +95,12 @@ export const practiceStore = defineStore('practice', {
           practiceTypeId: session.sessionTypeId,
           arrows,
         });
+
+        await this.fetchFromBackend(userId);
       } catch (error) {
         console.error('[syncToBackend] バックエンドへの送信に失敗しました:', error);
-        console.warn('ローカルには保存済みです。');
+        this.sessions = this.sessions.filter((s) => s.id !== session.id);
+        notificationStore().show('記録の保存に失敗しました。もう一度お試しください。');
       }
     },
     async fetchFromBackend(userId: string) {
@@ -110,9 +109,9 @@ export const practiceStore = defineStore('practice', {
         const data = res.data;
 
         if (Array.isArray(data)) {
-          data.forEach((record) => {
-            const existing = this.sessions.find((s) => s.id === record.recordId);
-            if (!existing && record.recordId) {
+          this.sessions = data
+            .filter((record) => record.recordId)
+            .map((record) => {
               const stands: Stand[] =
                 record.arrows && record.arrows.length > 0
                   ? [
@@ -128,7 +127,7 @@ export const practiceStore = defineStore('practice', {
                     ]
                   : [];
 
-              const backendSession: PracticeSession = {
+              return {
                 id: record.recordId,
                 date: record.practiceDate ?? new Date().toISOString(),
                 stands,
@@ -137,10 +136,7 @@ export const practiceStore = defineStore('practice', {
                 totalArrows: record.totalShots,
                 totalHits: record.hitCount,
               };
-              this.sessions.push(backendSession);
-            }
-          });
-          this.persistToStorage();
+            });
         }
       } catch {
         console.warn('バックエンドからのデータ取得に失敗しました。');

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { authStore } from '@/store/auth';
 
 export const api = axios.create({
   baseURL: 'http://localhost:8082',
@@ -18,9 +19,7 @@ api.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('jwt');
-      delete api.defaults.headers.common['Authorization'];
-      // ここで router.push('/login') とかやると便利（ただし router を import するか注入する必要あり）
+      authStore().logout();
     }
     return Promise.reject(error);
   }
