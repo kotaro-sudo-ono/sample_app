@@ -1,14 +1,17 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:8081',
+  baseURL: 'http://localhost:8082',
 });
 
-// 保存してある JWT を自動でヘッダーに付ける
-const token = localStorage.getItem('jwt');
-if (token) {
-  api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-}
+// リクエストごとに最新の JWT を自動でヘッダーに付ける
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('jwt');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+});
 
 // レスポンスで 401 を受けたら自動ログアウト用インターセプター
 api.interceptors.response.use(
