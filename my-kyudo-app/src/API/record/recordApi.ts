@@ -10,6 +10,7 @@ export type MonthlySummary = {
 export type ArrowRecord = {
   arrowId: string;
   arrowNumber: number;
+  standNumber: number;
   positionX?: number;
   positionY?: number;
   hit: boolean;
@@ -27,6 +28,7 @@ export type RecordItem = {
 
 export type SaveArrow = {
   arrowNumber: number;
+  standNumber: number;
   positionX?: number;
   positionY?: number;
   isHit: boolean;

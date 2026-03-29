@@ -11,6 +11,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  width: {
+    type: Number,
+    default: 50,
+  },
 });
 
 const emit = defineEmits<{
@@ -22,7 +26,7 @@ const { triggerShake, close, overlayClick } = useDialogTemplate(emit);
 
 <template>
   <div v-show="modelValue" class="overlay" @click="overlayClick">
-    <div :class="{ dialog: true, shake: triggerShake }">
+    <div :class="{ dialog: true, shake: triggerShake }" :style="{ width: `${props.width}%` }">
       <div>
         <h2>{{ dialogTitle }}</h2>
       </div>
@@ -59,7 +63,6 @@ const { triggerShake, close, overlayClick } = useDialogTemplate(emit);
   background-color: white;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  width: 50%;
   max-height: 75%; /* 親オーバーレイ内で最大値 */
   text-align: center;
   border: 1px solid #1867c0;
