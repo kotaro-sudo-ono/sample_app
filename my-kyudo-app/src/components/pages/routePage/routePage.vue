@@ -24,16 +24,8 @@ const { toRecordCalender, toRecordHits, toRecordHistory } = useRoutePage();
 </template>
 
 <style scoped>
-.button-group {
-  display: flex;
-  justify-content: center; /* 全体を中央寄せ */
-  gap: 20%; /* ボタン同士の間隔を%で */
-  margin: 10%; /* 外側の余白 */
-}
-
 .big-btn {
-  flex: 1; /* 均等に広がる */
-  max-width: 40%; /* 幅は最大40% */
+  width: 100%;
   height: 80px; /* デカい高さ */
   font-size: larger;
   font-weight: bold;
