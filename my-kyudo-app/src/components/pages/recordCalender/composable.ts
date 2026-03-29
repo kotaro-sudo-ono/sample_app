@@ -6,8 +6,7 @@ import type { CalendarTimestamp } from 'vuetify/lib/labs/VCalendar/types.mjs';
 export const useRecordCalender = (initialMonth?: string) => {
   const store = practiceStore();
 
-  const type = ref<'month' | 'week' | 'day'>('month');
-  const types = ['month', 'week', 'day'] as const;
+  const type = 'month' as const;
   const mode = ref<'stack' | 'column'>('stack');
 
   const nowJSTDate = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().substring(0, 10);
@@ -45,28 +44,12 @@ export const useRecordCalender = (initialMonth?: string) => {
 
   const currentPeriod = computed(() => {
     const date = calendarViewDate.value ? new Date(calendarViewDate.value) : new Date();
-    switch (type.value) {
-      case 'month':
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      case 'week':
-      case 'day':
-        return date.toISOString().substring(0, 10);
-    }
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   });
 
   const movePeriod = (offset: number) => {
     const date = new Date(calendarViewDate.value);
-    switch (type.value) {
-      case 'month':
-        date.setMonth(date.getMonth() + offset);
-        break;
-      case 'week':
-        date.setDate(date.getDate() + offset * 7);
-        break;
-      case 'day':
-        date.setDate(date.getDate() + offset);
-        break;
-    }
+    date.setMonth(date.getMonth() + offset);
     calendarViewDate.value = date.toISOString().substring(0, 10);
   };
 
@@ -137,7 +120,6 @@ export const useRecordCalender = (initialMonth?: string) => {
 
   return {
     type,
-    types,
     mode,
     calendarViewDate,
     selectedDate,

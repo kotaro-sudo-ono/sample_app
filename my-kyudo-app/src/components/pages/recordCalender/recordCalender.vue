@@ -9,7 +9,6 @@ const props = defineProps<{ initialMonth?: string }>();
 
 const {
   type,
-  types,
   mode,
   calendarViewDate,
   selectedDate,
@@ -35,15 +34,6 @@ const {
       <Button icon="mdi-chevron-left" @clickButton="movePeriod(-1)" class="calendar-btn" />
       <div class="current-period">{{ currentPeriod }}</div>
       <Button icon="mdi-chevron-right" @clickButton="movePeriod(1)" class="calendar-btn" />
-      <v-select
-        v-model="type"
-        :items="types"
-        class="type-select"
-        density="comfortable"
-        label="表示範囲"
-        variant="outlined"
-        hide-details
-      />
     </v-sheet>
 
     <!-- カレンダー本体 -->
@@ -177,10 +167,6 @@ const {
   flex: 1;
   text-align: center;
   font-weight: bold;
-}
-
-.type-select {
-  flex: 0 0 120px;
 }
 
 .dialog-main {
