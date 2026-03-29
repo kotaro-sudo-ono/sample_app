@@ -3,6 +3,12 @@ import { practiceStore, type PracticeSession, type Stand } from '@/store/practic
 import { authStore } from '@/store/auth';
 import type { CalendarTimestamp } from 'vuetify/lib/labs/VCalendar/types.mjs';
 
+const extractJSTDate = (isoString: string): string => {
+  const date = new Date(isoString);
+  const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  return jstDate.toISOString().substring(0, 10);
+};
+
 export const useRecordCalender = (initialMonth?: string) => {
   const store = practiceStore();
 
@@ -19,7 +25,7 @@ export const useRecordCalender = (initialMonth?: string) => {
   const calendarEvents = computed(() => {
     const dateMap = new Map<string, { hits: number; arrows: number }>();
     store.sessions.forEach((session) => {
-      const date = session.date.substring(0, 10);
+      const date = extractJSTDate(session.date);
       const existing = dateMap.get(date) ?? { hits: 0, arrows: 0 };
       dateMap.set(date, {
         hits: existing.hits + session.totalHits,

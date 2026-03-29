@@ -22,6 +22,12 @@ export type PracticeSession = {
   totalHits: number;
 };
 
+const extractJSTDate = (isoString: string): string => {
+  const date = new Date(isoString);
+  const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  return jstDate.toISOString().substring(0, 10);
+};
+
 export const practiceStore = defineStore('practice', {
   state: () => ({
     sessions: [] as PracticeSession[],
@@ -29,11 +35,11 @@ export const practiceStore = defineStore('practice', {
   getters: {
     getSessions: (state) => state.sessions,
     getSessionsByDate: (state) => {
-      return (date: string) => state.sessions.filter((s) => s.date.startsWith(date));
+      return (date: string) => state.sessions.filter((session) => extractJSTDate(session.date) === date);
     },
     getSessionDates: (state) => {
       const dates = new Set<string>();
-      state.sessions.forEach((s) => dates.add(s.date.substring(0, 10)));
+      state.sessions.forEach((session) => dates.add(extractJSTDate(session.date)));
       return dates;
     },
   },
