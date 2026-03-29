@@ -1,3 +1,4 @@
+import { ref } from 'vue';
 import { practiceStore } from '@/store/practice';
 
 export const useRecordHits = () => {
@@ -12,5 +13,10 @@ export const useRecordHits = () => {
     store.addSession(session);
   };
 
-  return { handleAddSession };
+  const isAiCoachDialogOpen = ref(false);
+  const openAiCoachDialog = () => {
+    isAiCoachDialogOpen.value = true;
+  };
+
+  return { handleAddSession, isAiCoachDialogOpen, openAiCoachDialog };
 };
