@@ -36,8 +36,21 @@ const activeTab = ref('edit');
         </v-tabs-window-item>
         <v-tabs-window-item value="diagnosis">
           <div class="diagnosis-panel">
-            <!-- 立選択 -->
-            <template v-if="!diagnosisLoading && !diagnosisAdviceText && !diagnosisErrorMessage">
+            <!-- ローディング -->
+            <div v-if="diagnosisLoading" class="diagnosis-loading">
+              <v-progress-circular indeterminate color="primary" size="48" />
+              <p>分析中...</p>
+            </div>
+
+            <!-- 結果 -->
+            <template v-else-if="diagnosisAdviceText">
+              <p class="advice-text">{{ diagnosisAdviceText }}</p>
+              <Button text="再診断" color="secondary" @click-button="handleReDiagnose" />
+            </template>
+
+            <!-- 立選択（エラー時も含む） -->
+            <template v-else>
+              <v-alert v-if="diagnosisErrorMessage" type="error" :text="diagnosisErrorMessage" class="mb-2" />
               <p class="diagnosis-desc">診断に使う立を選択してください</p>
               <div class="stand-list">
                 <div
@@ -59,28 +72,10 @@ const activeTab = ref('edit');
                 </div>
               </div>
               <Button
-                text="診断する"
+                :text="diagnosisErrorMessage ? '再診断' : '診断する'"
                 :disable="selectedStandIndices.length === 0"
                 @click-button="handleDiagnose"
               />
-            </template>
-
-            <!-- ローディング -->
-            <div v-else-if="diagnosisLoading" class="diagnosis-loading">
-              <v-progress-circular indeterminate color="primary" size="48" />
-              <p>分析中...</p>
-            </div>
-
-            <!-- エラー -->
-            <template v-else-if="diagnosisErrorMessage">
-              <v-alert type="error" :text="diagnosisErrorMessage" class="mb-4" />
-              <Button text="再診断" @click-button="handleReDiagnose" />
-            </template>
-
-            <!-- 結果 -->
-            <template v-else>
-              <p class="advice-text">{{ diagnosisAdviceText }}</p>
-              <Button text="再診断" color="secondary" @click-button="handleReDiagnose" />
             </template>
           </div>
         </v-tabs-window-item>
