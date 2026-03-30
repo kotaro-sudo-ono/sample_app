@@ -59,12 +59,24 @@ export const useRecordHits = (sessionId?: string) => {
 
   const handleDiagnose = async () => {
     if (!editingSession.value || selectedStandIndices.value.length === 0) return;
+    const filteredStands = selectedStandIndices.value
+      .slice()
+      .sort((a, b) => a - b)
+      .map((index) => ({
+        arrows: editingSession.value!.stands[index].arrows.filter(
+          (arrow) => arrow.hit || arrow.position !== undefined
+        ),
+      }))
+      .filter((stand) => stand.arrows.length > 0);
+
     const filteredSession: PracticeSession = {
       ...editingSession.value,
-      stands: selectedStandIndices.value
-        .slice()
-        .sort((a, b) => a - b)
-        .map((index) => editingSession.value!.stands[index]),
+      stands: filteredStands,
+      totalArrows: filteredStands.reduce((sum, stand) => sum + stand.arrows.length, 0),
+      totalHits: filteredStands.reduce(
+        (sum, stand) => sum + stand.arrows.filter((arrow) => arrow.hit).length,
+        0
+      ),
     };
     diagnosisLoading.value = true;
     diagnosisAdviceText.value = '';
