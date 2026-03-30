@@ -61,6 +61,7 @@ const activeTab = ref('edit');
                     :model-value="selectedStandIndices.includes(index)"
                     hide-details
                     density="compact"
+                    color="primary"
                     @click.stop="toggleStand(index)"
                   />
                   <span class="stand-label">
