@@ -5,7 +5,6 @@ import { fetchAiCoachAdvice } from '@/API/ai/aiSummaryApi';
 
 export const useRecordHits = (sessionId?: string) => {
   const store = practiceStore();
-  const activeTab = ref('edit');
 
   const editingSession = computed<PracticeSession | undefined>(() => {
     const session = store.getSessions.find((s) => s.id === sessionId);
@@ -44,9 +43,6 @@ export const useRecordHits = (sessionId?: string) => {
         0
       ),
     });
-    selectedStandIndices.value = [];
-    diagnosisAdviceText.value = '';
-    activeTab.value = 'diagnosis';
   };
 
   // 診断
@@ -102,7 +98,6 @@ export const useRecordHits = (sessionId?: string) => {
   };
 
   return {
-    activeTab,
     editingSession,
     handleAddSession,
     handleUpdateSession,
