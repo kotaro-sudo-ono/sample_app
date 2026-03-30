@@ -85,31 +85,25 @@ export const formatSessionsForPrompt = (sessions: PracticeSession[]): SessionSum
 };
 
 export const fetchAiCoachAdvice = async (sessions: PracticeSession[]): Promise<string> => {
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
+  const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
   if (!apiKey) {
-    throw new Error('APIキーが設定されていません。.env.local に VITE_ANTHROPIC_API_KEY を設定してください。');
+    throw new Error('APIキーが設定されていません。.env.local に VITE_GOOGLE_AI_API_KEY を設定してください。');
   }
 
   const sessionSummaries = formatSessionsForPrompt(sessions);
   const userMessage = `以下は選択された練習記録データです。このデータを分析して、射手のくせや傾向を指摘し、改善のアドバイスをしてください。\n\n${JSON.stringify(sessionSummaries, null, 2)}`;
 
   const response = await axios.post(
-    'https://api.anthropic.com/v1/messages',
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
     {
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userMessage }],
+      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+      generationConfig: { maxOutputTokens: 1024 },
     },
     {
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-        'content-type': 'application/json',
-      },
+      headers: { 'content-type': 'application/json' },
     }
   );
 
-  return response.data.content[0].text as string;
+  return response.data.candidates[0].content.parts[0].text as string;
 };
