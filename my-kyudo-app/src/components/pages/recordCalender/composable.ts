@@ -1,5 +1,6 @@
 import { ref, computed, onMounted } from 'vue';
-import { practiceStore, type PracticeSession, type Stand } from '@/store/practice';
+import { useRouter } from 'vue-router';
+import { practiceStore, type PracticeSession } from '@/store/practice';
 import { authStore } from '@/store/auth';
 import type { CalendarTimestamp } from 'vuetify/lib/labs/VCalendar/types.mjs';
 
@@ -11,6 +12,7 @@ const extractJSTDate = (isoString: string): string => {
 
 export const useRecordCalender = (initialMonth?: string) => {
   const store = practiceStore();
+  const router = useRouter();
 
   const type = 'month' as const;
   const mode = ref<'stack' | 'column'>('stack');
@@ -71,31 +73,8 @@ export const useRecordCalender = (initialMonth?: string) => {
     selectedDate.value = undefined;
   };
 
-  const deleteSession = (id: string) => {
-    store.deleteSession(id);
-  };
-
-  const editingSession = ref<PracticeSession | null>(null);
-
-  const startEdit = (session: PracticeSession) => {
-    editingSession.value = session;
-  };
-
-  const stopEdit = () => {
-    editingSession.value = null;
-  };
-
-  const handleUpdateSession = (data: { id: string; date: string; stands: Stand[]; notes: string; sessionTypeId: number }) => {
-    store.updateSession({
-      id: data.id,
-      date: data.date,
-      stands: data.stands,
-      notes: data.notes,
-      sessionTypeId: data.sessionTypeId,
-      totalArrows: data.stands.reduce((sum, stand) => sum + stand.arrows.length, 0),
-      totalHits: data.stands.reduce((sum, stand) => sum + stand.arrows.filter((arrow) => arrow.hit).length, 0),
-    });
-    stopEdit();
+  const navigateToEdit = (session: PracticeSession) => {
+    router.push({ name: 'recordHits', query: { sessionId: session.id } });
   };
 
   const formatAccuracy = (session: PracticeSession) => {
@@ -136,11 +115,7 @@ export const useRecordCalender = (initialMonth?: string) => {
     movePeriod,
     onDateClick,
     clearSelectDate,
-    deleteSession,
     formatAccuracy,
-    editingSession,
-    startEdit,
-    stopEdit,
-    handleUpdateSession,
+    navigateToEdit,
   };
 };
