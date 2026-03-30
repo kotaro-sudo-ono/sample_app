@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import RecordSession from '@/components/ui/recordSession/recordSession.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { useRecordHits } from './composable';
@@ -7,6 +6,7 @@ import { useRecordHits } from './composable';
 const props = defineProps<{ sessionId?: string }>();
 
 const {
+  activeTab,
   editingSession,
   handleAddSession,
   handleUpdateSession,
@@ -17,8 +17,6 @@ const {
   handleDiagnose,
   handleReDiagnose,
 } = useRecordHits(props.sessionId);
-
-const activeTab = ref('edit');
 </script>
 
 <template>

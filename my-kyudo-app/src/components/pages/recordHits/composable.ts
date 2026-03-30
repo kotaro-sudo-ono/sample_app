@@ -1,12 +1,11 @@
 import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
 import { practiceStore, type PracticeSession, type Stand } from '@/store/practice';
 import { notificationStore } from '@/store/notification';
 import { fetchAiCoachAdvice } from '@/API/ai/aiSummaryApi';
 
 export const useRecordHits = (sessionId?: string) => {
   const store = practiceStore();
-  const router = useRouter();
+  const activeTab = ref('edit');
 
   const editingSession = computed<PracticeSession | undefined>(() => {
     const session = store.getSessions.find((s) => s.id === sessionId);
@@ -45,7 +44,9 @@ export const useRecordHits = (sessionId?: string) => {
         0
       ),
     });
-    router.back();
+    selectedStandIndices.value = [];
+    diagnosisAdviceText.value = '';
+    activeTab.value = 'diagnosis';
   };
 
   // 診断
@@ -101,6 +102,7 @@ export const useRecordHits = (sessionId?: string) => {
   };
 
   return {
+    activeTab,
     editingSession,
     handleAddSession,
     handleUpdateSession,
