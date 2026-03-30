@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import RecordSession from '@/components/ui/recordSession/recordSession.vue';
 import AiCoachDialog from '@/components/ui/aiCoachDialog/aiCoachDialog.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { useRecordHits } from './composable';
+
+const activeTab = ref('edit');
 
 const props = defineProps<{ sessionId?: string }>();
 
@@ -24,11 +27,11 @@ const {
   <div class="score-page">
     <!-- 編集モード: タブ（編集 | 診断） -->
     <template v-if="editingSession">
-      <v-tabs grow>
+      <v-tabs v-model="activeTab" grow>
         <v-tab value="edit">編集</v-tab>
         <v-tab value="diagnosis">診断</v-tab>
       </v-tabs>
-      <v-tabs-window>
+      <v-tabs-window v-model="activeTab">
         <v-tabs-window-item value="edit">
           <RecordSession :edit-session="editingSession" @update-session="handleUpdateSession" />
         </v-tabs-window-item>
