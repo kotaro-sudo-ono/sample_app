@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import RecordSession from '@/components/ui/recordSession/recordSession.vue';
-import AiCoachDialog from '@/components/ui/aiCoachDialog/aiCoachDialog.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { useRecordHits } from './composable';
-
-const activeTab = ref('edit');
 
 const props = defineProps<{ sessionId?: string }>();
 
@@ -13,14 +10,16 @@ const {
   editingSession,
   handleAddSession,
   handleUpdateSession,
+  selectedStandIndices,
+  toggleStand,
   diagnosisLoading,
   diagnosisAdviceText,
   diagnosisErrorMessage,
   handleDiagnose,
   handleReDiagnose,
-  isAiCoachDialogOpen,
-  openAiCoachDialog,
 } = useRecordHits(props.sessionId);
+
+const activeTab = ref('edit');
 </script>
 
 <template>
@@ -37,11 +36,34 @@ const {
         </v-tabs-window-item>
         <v-tabs-window-item value="diagnosis">
           <div class="diagnosis-panel">
-            <!-- 未診断 -->
-            <div v-if="!diagnosisLoading && !diagnosisAdviceText && !diagnosisErrorMessage" class="diagnosis-start">
-              <p class="diagnosis-desc">このセッションの的中パターンをAIが分析します</p>
-              <Button text="診断する" @click-button="handleDiagnose" />
-            </div>
+            <!-- 立選択 -->
+            <template v-if="!diagnosisLoading && !diagnosisAdviceText && !diagnosisErrorMessage">
+              <p class="diagnosis-desc">診断に使う立を選択してください</p>
+              <div class="stand-list">
+                <div
+                  v-for="(stand, index) in editingSession.stands"
+                  :key="index"
+                  class="stand-item"
+                  @click="toggleStand(index)"
+                >
+                  <v-checkbox
+                    :model-value="selectedStandIndices.includes(index)"
+                    hide-details
+                    density="compact"
+                    @click.stop="toggleStand(index)"
+                  />
+                  <span class="stand-label">
+                    第{{ index + 1 }}立
+                    （{{ stand.arrows.filter((arrow) => arrow.hit).length }}/{{ stand.arrows.length }}中）
+                  </span>
+                </div>
+              </div>
+              <Button
+                text="診断する"
+                :disable="selectedStandIndices.length === 0"
+                @click-button="handleDiagnose"
+              />
+            </template>
 
             <!-- ローディング -->
             <div v-else-if="diagnosisLoading" class="diagnosis-loading">
@@ -50,16 +72,16 @@ const {
             </div>
 
             <!-- エラー -->
-            <div v-else-if="diagnosisErrorMessage">
+            <template v-else-if="diagnosisErrorMessage">
               <v-alert type="error" :text="diagnosisErrorMessage" class="mb-4" />
               <Button text="再診断" @click-button="handleReDiagnose" />
-            </div>
+            </template>
 
             <!-- 結果 -->
-            <div v-else>
+            <template v-else>
               <p class="advice-text">{{ diagnosisAdviceText }}</p>
               <Button text="再診断" color="secondary" @click-button="handleReDiagnose" />
-            </div>
+            </template>
           </div>
         </v-tabs-window-item>
       </v-tabs-window>
@@ -68,12 +90,8 @@ const {
     <!-- 新規入力モード -->
     <template v-else>
       <RecordSession @add-session="handleAddSession" />
-      <v-btn class="ai-coach-btn" color="primary" variant="tonal" @click="openAiCoachDialog">
-        AIコーチに相談
-      </v-btn>
     </template>
   </div>
-  <AiCoachDialog v-model="isAiCoachDialogOpen" />
 </template>
 
 <style scoped>
@@ -85,11 +103,6 @@ const {
   flex-direction: column;
 }
 
-.ai-coach-btn {
-  margin-top: 12px;
-  font-weight: bold;
-}
-
 .diagnosis-panel {
   padding: 16px 8px;
   display: flex;
@@ -97,17 +110,32 @@ const {
   gap: 16px;
 }
 
-.diagnosis-start {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 24px 0;
-}
-
 .diagnosis-desc {
   color: #555;
   font-size: 0.9rem;
+}
+
+.stand-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stand-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.stand-item:hover {
+  background-color: #f5f5f5;
+}
+
+.stand-label {
+  font-size: 0.9rem;
+  color: #333;
 }
 
 .diagnosis-loading {
@@ -124,6 +152,5 @@ const {
   text-align: left;
   font-size: 0.9rem;
   line-height: 1.6;
-  margin-bottom: 16px;
 }
 </style>
