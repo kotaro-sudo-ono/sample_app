@@ -80,7 +80,7 @@ const {
                 <div v-for="(stand, sIndex) in session.stands" :key="sIndex" class="stand-summary">
                   <span class="stand-label">第{{ sIndex + 1 }}立:</span>
                   <span
-                    v-for="(arrow, aIndex) in stand.arrows"
+                    v-for="(arrow, aIndex) in stand.arrows.filter((arrow) => arrow.hit || arrow.position !== undefined)"
                     :key="aIndex"
                     class="arrow-mark"
                     :class="{ hit: arrow.hit }"
@@ -88,7 +88,7 @@ const {
                     {{ arrow.hit ? '◯' : '✕' }}
                   </span>
                   <span class="stand-result">
-                    ({{ stand.arrows.filter((arrow) => arrow.hit).length }}/{{ stand.arrows.length }})
+                    ({{ stand.arrows.filter((arrow) => arrow.hit).length }}/{{ stand.arrows.filter((arrow) => arrow.hit || arrow.position !== undefined).length }})
                   </span>
                 </div>
                 <p v-if="session.notes" class="session-notes mt-2">
