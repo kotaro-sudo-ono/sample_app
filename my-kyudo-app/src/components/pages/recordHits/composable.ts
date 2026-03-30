@@ -44,17 +44,34 @@ export const useRecordHits = (sessionId?: string) => {
   };
 
   // 診断
+  const selectedStandIndices = ref<number[]>([]);
   const diagnosisLoading = ref(false);
   const diagnosisAdviceText = ref('');
   const diagnosisErrorMessage = ref('');
 
+  const toggleStand = (index: number) => {
+    const pos = selectedStandIndices.value.indexOf(index);
+    if (pos === -1) {
+      selectedStandIndices.value.push(index);
+    } else {
+      selectedStandIndices.value.splice(pos, 1);
+    }
+  };
+
   const handleDiagnose = async () => {
-    if (!editingSession.value) return;
+    if (!editingSession.value || selectedStandIndices.value.length === 0) return;
+    const filteredSession: PracticeSession = {
+      ...editingSession.value,
+      stands: selectedStandIndices.value
+        .slice()
+        .sort((a, b) => a - b)
+        .map((index) => editingSession.value!.stands[index]),
+    };
     diagnosisLoading.value = true;
     diagnosisAdviceText.value = '';
     diagnosisErrorMessage.value = '';
     try {
-      diagnosisAdviceText.value = await fetchAiCoachAdvice([editingSession.value]);
+      diagnosisAdviceText.value = await fetchAiCoachAdvice([filteredSession]);
     } catch (error) {
       const message = error instanceof Error ? error.message : '診断中にエラーが発生しました。';
       diagnosisErrorMessage.value = message;
@@ -69,21 +86,16 @@ export const useRecordHits = (sessionId?: string) => {
     await handleDiagnose();
   };
 
-  const isAiCoachDialogOpen = ref(false);
-  const openAiCoachDialog = () => {
-    isAiCoachDialogOpen.value = true;
-  };
-
   return {
     editingSession,
     handleAddSession,
     handleUpdateSession,
+    selectedStandIndices,
+    toggleStand,
     diagnosisLoading,
     diagnosisAdviceText,
     diagnosisErrorMessage,
     handleDiagnose,
     handleReDiagnose,
-    isAiCoachDialogOpen,
-    openAiCoachDialog,
   };
 };
