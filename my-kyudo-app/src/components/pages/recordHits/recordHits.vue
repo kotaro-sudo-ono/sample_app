@@ -14,7 +14,6 @@ const {
   toggleStand,
   diagnosisLoading,
   diagnosisAdviceText,
-  diagnosisErrorMessage,
   handleDiagnose,
   handleReDiagnose,
 } = useRecordHits(props.sessionId);
@@ -50,7 +49,6 @@ const activeTab = ref('edit');
 
             <!-- 立選択（エラー時も含む） -->
             <template v-else>
-              <v-alert v-if="diagnosisErrorMessage" type="error" :text="diagnosisErrorMessage" class="mb-2" />
               <p class="diagnosis-desc">診断に使う立を選択してください</p>
               <div class="stand-list">
                 <div
@@ -72,7 +70,7 @@ const activeTab = ref('edit');
                 </div>
               </div>
               <Button
-                :text="diagnosisErrorMessage ? '再診断' : '診断する'"
+                text="診断する"
                 :disable="selectedStandIndices.length === 0"
                 @click-button="handleDiagnose"
               />

@@ -47,7 +47,6 @@ export const useRecordHits = (sessionId?: string) => {
   const selectedStandIndices = ref<number[]>([]);
   const diagnosisLoading = ref(false);
   const diagnosisAdviceText = ref('');
-  const diagnosisErrorMessage = ref('');
 
   const toggleStand = (index: number) => {
     const pos = selectedStandIndices.value.indexOf(index);
@@ -69,12 +68,10 @@ export const useRecordHits = (sessionId?: string) => {
     };
     diagnosisLoading.value = true;
     diagnosisAdviceText.value = '';
-    diagnosisErrorMessage.value = '';
     try {
       diagnosisAdviceText.value = await fetchAiCoachAdvice([filteredSession]);
     } catch (error) {
       const message = error instanceof Error ? error.message : '診断中にエラーが発生しました。';
-      diagnosisErrorMessage.value = message;
       notificationStore().show(message);
     } finally {
       diagnosisLoading.value = false;
@@ -94,7 +91,6 @@ export const useRecordHits = (sessionId?: string) => {
     toggleStand,
     diagnosisLoading,
     diagnosisAdviceText,
-    diagnosisErrorMessage,
     handleDiagnose,
     handleReDiagnose,
   };
