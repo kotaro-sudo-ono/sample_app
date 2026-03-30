@@ -43,6 +43,7 @@ export const useRecordHits = (sessionId?: string) => {
         0
       ),
     });
+    notificationStore().show('記録を更新しました', 'success');
   };
 
   // 診断

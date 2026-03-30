@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import RecordSession from '@/components/ui/recordSession/recordSession.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { useRecordHits } from './composable';
+
+const router = useRouter();
 
 const props = defineProps<{ sessionId?: string }>();
 
@@ -25,6 +28,10 @@ const {
   <div class="score-page">
     <!-- 編集モード: タブ（編集 | 診断） -->
     <template v-if="editingSession">
+      <v-btn variant="text" color="primary" class="back-btn" @click="router.back()">
+        <v-icon start>mdi-chevron-left</v-icon>
+        戻る
+      </v-btn>
       <v-tabs v-model="activeTab" grow>
         <v-tab value="edit">編集</v-tab>
         <v-tab value="diagnosis">診断</v-tab>
@@ -95,6 +102,11 @@ const {
   width: 100%;
   height: 100%;
   flex-direction: column;
+}
+
+.back-btn {
+  align-self: flex-start;
+  margin-bottom: 4px;
 }
 
 .diagnosis-panel {
