@@ -8,9 +8,14 @@ export const useRecordHits = (sessionId?: string) => {
   const store = practiceStore();
   const router = useRouter();
 
-  const editingSession = computed<PracticeSession | undefined>(
-    () => store.getSessions.find((session) => session.id === sessionId)
-  );
+  const editingSession = computed<PracticeSession | undefined>(() => {
+    const session = store.getSessions.find((s) => s.id === sessionId);
+    if (!session) return undefined;
+    const stands = session.stands.filter((stand) =>
+      stand.arrows.some((arrow) => arrow.hit || arrow.position !== undefined)
+    );
+    return { ...session, stands };
+  });
 
   const handleAddSession = (session: {
     date: string;
