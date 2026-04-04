@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { authStore } from './store/auth';
 import GlobalSnackbar from './components/ui/globalSnackbar/GlobalSnackbar.vue';
 import { useRouter, useRoute } from 'vue-router';
@@ -15,8 +15,6 @@ const logout = () => {
   router.push({ name: 'homeGuest' });
   useAuthStore.logout();
 };
-
-const bottomNavValue = ref(null);
 
 const bottomNavItems = [
   { label: 'ホーム', icon: 'mdi-home', route: 'homeDashboard' },
