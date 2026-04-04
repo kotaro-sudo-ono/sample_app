@@ -49,6 +49,10 @@ const navCards: NavCard[] = [
           elevation="2"
           rounded="lg"
           @click="card.action"
+          @keydown.enter.prevent="card.action"
+          @keydown.space.prevent="card.action"
+          role="button"
+          tabindex="0"
           hover
         >
           <v-card-text class="text-center pa-6">
