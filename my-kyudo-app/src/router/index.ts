@@ -11,10 +11,19 @@ const router = createRouter({
   routes: [
     { path: '/', name: 'homeGuest', component: home },
     { path: '/dashboard', name: 'homeDashboard', component: routePage },
-    { path: '/signIn', name: 'signIn', component: SignIn },
-    { path: '/signUp', name: 'signUp', component: signUp },
+    { path: '/signIn', name: 'signIn', component: SignIn, meta: { hideAppBar: true } },
+    { path: '/signUp', name: 'signUp', component: signUp, meta: { hideAppBar: true } },
     { path: '/homeDashboard/recordCalender', name: 'recordCalender', component: recordCalender },
-    { path: '/homeDashboard/recordHits', name: 'recordHits', component: recordHits },
+    {
+      path: '/homeDashboard/recordHits',
+      name: 'recordHits',
+      component: recordHits,
+      props: (route) => {
+        const raw = route.query.sessionId;
+        const sessionId = Array.isArray(raw) ? raw[0] ?? undefined : typeof raw === 'string' ? raw : undefined;
+        return { sessionId };
+      },
+    },
     { path: '/homeDashboard/recordHistory', name: 'recordHistory', component: recordHistory },
   ],
 });

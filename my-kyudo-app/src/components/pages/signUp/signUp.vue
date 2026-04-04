@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import PageTemplate from '@/components/layout/pageTemplate/PageTemplate.vue';
-import DialogTemplate from '@/components/ui/dialogTemplate/DialogTemplate.vue';
 import { useSignUp } from './composable';
 import Button from '@/components/ui/button/Button.vue';
 
@@ -19,109 +17,154 @@ const isButtonDisabled = computed(() => {
 </script>
 
 <template>
-  <PageTemplate>
-    <template #content-center>
-      <DialogTemplate :model-value="true" dialog-title="新規登録">
-        <template #content>
-          <v-container class="container">
-            <v-row class="main_content">
-              <div class="main_content_set">
-                <v-card-subtitle class="text-center">登録情報を入力</v-card-subtitle>
+  <div class="auth-page">
+    <header class="auth-header">
+      <v-btn variant="text" :to="{ name: 'homeGuest' }" prepend-icon="mdi-chevron-left" color="primary">
+        弓道記録
+      </v-btn>
+    </header>
 
-                <v-form class="form">
-                  <v-text-field
-                    clearable
-                    prepend-inner-icon="mdi-email-outline"
-                    v-model="email"
-                    label="Email"
-                    placeholder="johndoe@gmail.com"
-                    type="email"
-                    required
-                    outlined
-                    :error="!!emailError"
-                    :error-messages="emailError"
-                  ></v-text-field>
+    <main class="auth-main">
+      <v-card class="auth-card" elevation="0" rounded="lg">
+        <div class="auth-card-header">
+          <v-icon size="40" color="primary">mdi-bullseye</v-icon>
+          <h1 class="auth-title">新規登録</h1>
+          <p class="auth-subtitle">弓道の歩みを記録する</p>
+        </div>
 
-                  <v-text-field
-                    prepend-inner-icon="mdi-account"
-                    clearable
-                    v-model="name"
-                    label="name"
-                    type="name"
-                    required
-                    outlined
-                    :error="!!nameError"
-                    :error-messages="nameError"
-                  >
-                  </v-text-field>
+        <v-divider class="my-4" />
 
-                  <v-text-field
-                    v-model="password"
-                    :type="showPassword ? 'text' : 'password'"
-                    label="Password"
-                    prepend-inner-icon="mdi-key-outline"
-                    :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                    @click:append-inner="showPassword = !showPassword"
-                  />
-                  <div :class="{ shake: isButtonDisabled }">
-                    <Button text="登録" @clickButton="submitForm" />
-                    <span v-if="isButtonDisabled" class="error-message"> 入力内容が正しくありません！ </span>
-                  </div>
-                </v-form>
+        <v-form class="auth-form" @submit.prevent="submitForm">
+          <v-text-field
+            clearable
+            prepend-inner-icon="mdi-email-outline"
+            v-model="email"
+            label="メールアドレス"
+            placeholder="johndoe@gmail.com"
+            type="email"
+            variant="outlined"
+            color="primary"
+            :error="!!emailError"
+            :error-messages="emailError"
+          />
 
-                <v-divider></v-divider>
-              </div>
-            </v-row>
-          </v-container>
-        </template>
-        <template #close>
-          <div />
-        </template>
-      </DialogTemplate>
-    </template>
-  </PageTemplate>
+          <v-text-field
+            prepend-inner-icon="mdi-account"
+            clearable
+            v-model="name"
+            label="ユーザー名"
+            variant="outlined"
+            color="primary"
+            :error="!!nameError"
+            :error-messages="nameError"
+          />
+
+          <v-text-field
+            v-model="password"
+            :type="showPassword ? 'text' : 'password'"
+            label="パスワード"
+            prepend-inner-icon="mdi-key-outline"
+            :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+            @click:append-inner="showPassword = !showPassword"
+            variant="outlined"
+            color="primary"
+            :error="!!passwordError"
+            :error-messages="passwordError"
+          />
+
+          <div :class="{ shake: isButtonDisabled }">
+            <Button text="登録" @clickButton="submitForm" />
+            <span v-if="isButtonDisabled" class="error-message">入力内容が正しくありません！</span>
+          </div>
+        </v-form>
+
+        <div class="auth-footer">
+          <span class="auth-footer-text">すでにアカウントをお持ちの方は</span>
+          <v-btn variant="text" color="primary" :to="{ name: 'signIn' }" size="small">
+            ログイン
+          </v-btn>
+        </div>
+      </v-card>
+    </main>
+  </div>
 </template>
 
 <style scoped>
-.headline {
-  color: #1867c0;
-  font-size: 30px;
-}
-.text-center {
-  color: #1867c0;
-  font-size: 30px;
-}
-.container {
-  height: 100%;
-  max-width: 3000px;
-}
-.main_content {
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-}
-.main_content_set {
-  width: 600px;
-  border-radius: 12px;
-  border: 1px solid #1867c0;
-}
-.btn {
-  border-radius: 12px;
-}
-.form {
-  padding: 10px;
+.auth-page {
+  min-height: 100vh;
+  background: rgb(var(--v-theme-background));
+  display: flex;
+  flex-direction: column;
 }
 
-:deep(.v-input--density-default .v-field--variant-filled) {
-  border-radius: 18px;
+.auth-header {
+  padding: 12px 16px;
+}
+
+.auth-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 32px 28px;
+  border: 1px solid rgba(59, 42, 26, 0.2);
+  background: rgb(var(--v-theme-surface));
+}
+
+.auth-card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.auth-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgb(var(--v-theme-primary));
+  margin: 0;
+}
+
+.auth-subtitle {
+  font-size: 0.875rem;
+  color: rgba(59, 42, 26, 0.6);
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .error-message {
-  color: #d32f2f; /* 濃い赤 */
-  font-weight: bold;
-  font-size: 14px;
-  margin-top: 8px;
+  color: rgb(var(--v-theme-error));
+  font-size: 0.875rem;
+  font-weight: 600;
   display: block;
+  margin-top: 8px;
+}
+
+.auth-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.auth-footer-text {
+  font-size: 0.875rem;
+  color: rgba(59, 42, 26, 0.6);
 }
 
 .shake {
@@ -130,25 +173,9 @@ const isButtonDisabled = computed(() => {
 }
 
 @keyframes shake {
-  10%,
-  90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-
-  20%,
-  80% {
-    transform: translate3d(2px, 0, 0);
-  }
-
-  30%,
-  50%,
-  70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-
-  40%,
-  60% {
-    transform: translate3d(4px, 0, 0);
-  }
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
 }
 </style>

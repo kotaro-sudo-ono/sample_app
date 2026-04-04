@@ -36,7 +36,7 @@ const accuracy = computed(() =>
 </script>
 <template>
   <div class="record-container">
-    <Button icon="mdi-plus" @click-button="addShot" class="add-btn" color=""></Button>
+    <Button icon="mdi-plus" color="" @click-button="addShot" class="add-btn" />
     <div class="marks">
       <Button
         v-for="(mark, index) in record.records"
@@ -44,7 +44,6 @@ const accuracy = computed(() =>
         class="mark-btn"
         @click="toggleMark(record, index)"
         :text="mark === 1 ? '◯' : mark === 0 ? '✖' : ''"
-        color=""
       />
     </div>
 

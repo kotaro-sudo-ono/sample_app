@@ -14,8 +14,12 @@ export const useSignUp = (email: Ref<string>, name: Ref<string>, password: Ref<s
 
   const emailValidation = (): true | string => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email.value) return 'メールアドレスを入力してください';
-    if (!emailRegex.test(email.value)) return '有効なメールアドレス形式で入力してください';
+    if (!email.value) {
+      return 'メールアドレスを入力してください';
+    }
+    if (!emailRegex.test(email.value)) {
+      return '有効なメールアドレス形式で入力してください';
+    }
     return true;
   };
 

@@ -17,7 +17,9 @@ export const useTargetDialog = (
   watch(open, (v) => {
     if (v) {
       const pos = getCurrentPosition();
-      if (pos) marker.value = pos;
+      if (pos) {
+        marker.value = pos;
+      }
     } else {
       marker.value = undefined;
     }
@@ -25,7 +27,9 @@ export const useTargetDialog = (
 
   const handleTargetClick = (e: MouseEvent) => {
     const el = targetRef.value;
-    if (!el) return;
+    if (!el) {
+      return;
+    }
     const rect = el.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Button from '@/components/ui/button/Button.vue';
 import DialogTemplate from '@/components/ui/dialogTemplate/DialogTemplate.vue';
-import RecordSession from '@/components/ui/recordSession/recordSession.vue';
 import { getTypeName, type PracticeType } from '@/types/practiceType';
 import { useRecordCalender } from './composable';
 
@@ -20,10 +19,7 @@ const {
   onDateClick,
   clearSelectDate,
   formatAccuracy,
-  editingSession,
-  startEdit,
-  stopEdit,
-  handleUpdateSession,
+  navigateToEdit,
 } = useRecordCalender(props.initialMonth);
 </script>
 
@@ -60,9 +56,8 @@ const {
         :model-value="showDialog"
         :dialog-title="selectedDate ? `${selectedDate} の記録` : '記録'"
         @cancel="clearSelectDate"
-        
       >
-        <template #content >
+        <template #content>
           <div v-if="selectedSessions.length === 0" class="no-records">
             <v-icon size="48" color="grey">mdi-note-off-outline</v-icon>
             <p>この日の記録はありません</p>
@@ -82,10 +77,14 @@ const {
                 </v-chip>
               </v-card-title>
               <v-card-text>
-                <div v-for="(stand, sIndex) in session.stands" :key="sIndex" class="stand-summary">
-                  <span class="stand-label">第{{ sIndex + 1 }}立:</span>
+                <div
+                  v-for="(stand, sIndex) in session.stands.map((stand, i) => ({ ...stand, originalIndex: i })).filter((stand) => stand.arrows.some((arrow) => arrow.hit || arrow.position !== undefined))"
+                  :key="sIndex"
+                  class="stand-summary"
+                >
+                  <span class="stand-label">第{{ stand.originalIndex + 1 }}立:</span>
                   <span
-                    v-for="(arrow, aIndex) in stand.arrows"
+                    v-for="(arrow, aIndex) in stand.arrows.filter((arrow) => arrow.hit || arrow.position !== undefined)"
                     :key="aIndex"
                     class="arrow-mark"
                     :class="{ hit: arrow.hit }"
@@ -93,7 +92,7 @@ const {
                     {{ arrow.hit ? '◯' : '✕' }}
                   </span>
                   <span class="stand-result">
-                    ({{ stand.arrows.filter((a) => a.hit).length }}/{{ stand.arrows.length }})
+                    ({{ stand.arrows.filter((arrow) => arrow.hit).length }}/{{ stand.arrows.filter((arrow) => arrow.hit || arrow.position !== undefined).length }})
                   </span>
                 </div>
                 <p v-if="session.notes" class="session-notes mt-2">
@@ -102,9 +101,9 @@ const {
                 </p>
               </v-card-text>
               <v-card-actions>
-                <v-btn size="small" color="primary" variant="text" @click="startEdit(session)">
+                <v-btn size="small" color="primary" variant="text" @click="navigateToEdit(session)">
                   <v-icon start>mdi-pencil</v-icon>
-                  編集
+                  編集・診断
                 </v-btn>
               </v-card-actions>
             </v-card>
@@ -112,25 +111,6 @@ const {
         </template>
         <template #close>
           <Button text="閉じる" @clickButton="clearSelectDate" />
-        </template>
-      </DialogTemplate>
-
-      <!-- 編集ダイアログ -->
-      <DialogTemplate
-        :width="90"
-        :model-value="!!editingSession"
-        dialog-title="記録を編集"
-        @cancel="stopEdit"
-      >
-        <template #content>
-          <RecordSession
-            v-if="editingSession"
-            :edit-session="editingSession"
-            @update-session="handleUpdateSession"
-          />
-        </template>
-        <template #close>
-          <Button text="キャンセル" @clickButton="stopEdit" />
         </template>
       </DialogTemplate>
     </v-sheet>
@@ -201,6 +181,7 @@ const {
 
 .stand-summary {
   margin-bottom: 4px;
+  text-align: left;
 }
 
 .stand-label {
