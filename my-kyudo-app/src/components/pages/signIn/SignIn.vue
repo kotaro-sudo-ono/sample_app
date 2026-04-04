@@ -28,7 +28,7 @@ const { loginForm, loginError } = useSignIn(email, password);
 
         <v-divider class="my-4" />
 
-        <v-form class="auth-form">
+        <v-form class="auth-form" @submit.prevent="loginForm">
           <v-text-field
             clearable
             prepend-inner-icon="mdi-email-outline"
