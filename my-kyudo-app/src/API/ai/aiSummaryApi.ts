@@ -1,6 +1,20 @@
 import axios from 'axios';
 import { type PracticeSession } from '@/store/practice';
 import { getTypeName, type PracticeType } from '@/types/practiceType';
+import kyudoKnowledge from './kyudoKnowledge.json';
+
+type KnowledgeCategory = {
+  name: string;
+  items: string[];
+};
+
+const buildKnowledgeText = (): string =>
+  kyudoKnowledge.categories
+    .map(
+      (category: KnowledgeCategory) =>
+        `【${category.name}】\n${category.items.map((item) => `- ${item}`).join('\n')}`
+    )
+    .join('\n\n');
 
 const SYSTEM_PROMPT = `あなたは弓道の専門コーチです。
 初心者〜中級者に対して、実践的で具体的なアドバイスを行ってください。
@@ -16,30 +30,17 @@ const SYSTEM_PROMPT = `あなたは弓道の専門コーチです。
 - 極端な変化があれば原因を推測する
 
 # 弓道ナレッジ
-- 会（かい）の安定が最重要
-- 離れは意図的に出すのではなく自然に出る状態が理想
-- 的中率が低いときは細かい技術より基本動作を優先
-- 体のブレは的中率に直結する
-- 手の内の緩みは矢のブレにつながる
-- 矢所が的の左側に偏っている → 早気（はやけ）の可能性：会が短く離れが早すぎる
-- 矢所が的の右側に偏っている → もたれの可能性：会で緊張しすぎて離れが遅れる
-- 矢所が的の上側に偏っている → 引っかかりの可能性：弦が引っかかって離れが不安定
-- 矢所が的の下側に偏っている → 胴造りの崩れや押手の下がりの可能性
-- 初矢（1本目）を外しやすい場合は早気や緊張が原因の可能性がある
-- 末矢（最後の矢）を外しやすい場合はもたれが原因の可能性がある
-- 審査・大会で成績が落ちる場合は緊張によるくせの悪化が考えられる
+${buildKnowledgeText()}
+
+# 制約
+- 上記「弓道ナレッジ」に記載された知識のみを使うこと
+- ナレッジに根拠のないアドバイスはしない
 
 # 出力ルール（絶対に守る）
 以下の形式で出力すること：
 
-【総評】
-（全体の傾向を一言で）
-
-【良い点】
-- （データに基づいた具体的な良い点を2〜3個）
-
-【改善点】
-- （原因とセットで2〜3個）
+【くせ・傾向】
+- （矢所・的中パターンから読み取れる射手のくせ。断定せず「〜の可能性がある」「〜が考えられる」など可能性として列挙する）
 
 【次の練習でやること】
 - （具体的な行動を3個。すぐ実践できる内容にする）
@@ -48,11 +49,14 @@ const SYSTEM_PROMPT = `あなたは弓道の専門コーチです。
 - 抽象的な表現（例：「意識しましょう」だけ）
 - データに基づかない推測
 - 同じ内容の繰り返し
+- ユーザーへの共感・褒め言葉・評価（例：「素晴らしい」「惜しかったですね」）
+- 総評セクション
 
 # 出力スタイル
 - 簡潔で読みやすく
-- 1行は長すぎない
-- 実際の指導のように書く`;
+- 各項目は1〜2行以内に収める
+- 実際の指導のように書く
+- Markdownは使わない（**太字**・番号付きリストなど禁止）`;
 
 type ArrowSummary = {
   arrowNumber: number;
@@ -117,16 +121,24 @@ export const fetchAiCoachAdvice = async (sessions: PracticeSession[]): Promise<s
   const userMessage = `以下の練習データを分析してください:\n\n${JSON.stringify(sessionSummaries, null, 2)}`;
 
   const response = await axios.post(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
     {
       system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
       contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-      generationConfig: { maxOutputTokens: 1024 },
+      generationConfig: { maxOutputTokens: 4096 },
     },
     {
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': apiKey },
     }
   );
 
-  return response.data.candidates[0].content.parts[0].text as string;
+  const candidates = response.data?.candidates;
+  if (!candidates || candidates.length === 0) {
+    throw new Error('AIからの応答がありませんでした');
+  }
+  const text = candidates[0]?.content?.parts?.[0]?.text;
+  if (!text) {
+    throw new Error('AIの応答形式が不正です');
+  }
+  return text;
 };
