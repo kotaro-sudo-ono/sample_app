@@ -9,6 +9,7 @@ const router = useRouter();
 const route = useRoute();
 
 const isLoggedIn = computed(() => useAuthStore.getIsLoggedIn);
+const hideAppBar = computed(() => !!route.meta.hideAppBar);
 
 const logout = () => {
   router.push({ name: 'homeGuest' });
@@ -31,7 +32,7 @@ const navigateTo = (routeName: string) => {
 
 <template>
   <v-app :style="{ fontFamily: '\'Noto Serif JP\', serif' }">
-    <v-app-bar color="primary" elevation="2">
+    <v-app-bar v-if="!hideAppBar" color="primary" elevation="2">
       <v-app-bar-title class="app-title">弓道記録</v-app-bar-title>
 
       <template v-slot:append>
