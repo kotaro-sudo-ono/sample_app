@@ -78,11 +78,11 @@ const {
               </v-card-title>
               <v-card-text>
                 <div
-                  v-for="(stand, sIndex) in session.stands.filter((stand) => stand.arrows.some((arrow) => arrow.hit || arrow.position !== undefined))"
+                  v-for="(stand, sIndex) in session.stands.map((stand, i) => ({ ...stand, originalIndex: i })).filter((stand) => stand.arrows.some((arrow) => arrow.hit || arrow.position !== undefined))"
                   :key="sIndex"
                   class="stand-summary"
                 >
-                  <span class="stand-label">第{{ sIndex + 1 }}立:</span>
+                  <span class="stand-label">第{{ stand.originalIndex + 1 }}立:</span>
                   <span
                     v-for="(arrow, aIndex) in stand.arrows.filter((arrow) => arrow.hit || arrow.position !== undefined)"
                     :key="aIndex"
