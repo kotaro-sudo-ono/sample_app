@@ -98,6 +98,11 @@ export const useRecordHits = (sessionId?: string) => {
     await handleDiagnose();
   };
 
+  const isAiCoachDialogOpen = ref(false);
+  const openAiCoachDialog = () => {
+    isAiCoachDialogOpen.value = true;
+  };
+
   return {
     editingSession,
     handleAddSession,
@@ -108,5 +113,7 @@ export const useRecordHits = (sessionId?: string) => {
     diagnosisAdviceText,
     handleDiagnose,
     handleReDiagnose,
+    isAiCoachDialogOpen,
+    openAiCoachDialog,
   };
 };

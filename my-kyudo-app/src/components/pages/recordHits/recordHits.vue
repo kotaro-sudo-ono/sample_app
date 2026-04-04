@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import RecordSession from '@/components/ui/recordSession/recordSession.vue';
 import Button from '@/components/ui/button/Button.vue';
+import AiCoachDialog from '@/components/ui/aiCoachDialog/aiCoachDialog.vue';
 import { useRecordHits } from './composable';
 
 const router = useRouter();
@@ -21,6 +22,8 @@ const {
   diagnosisAdviceText,
   handleDiagnose,
   handleReDiagnose,
+  isAiCoachDialogOpen,
+  openAiCoachDialog,
 } = useRecordHits(props.sessionId);
 </script>
 
@@ -91,8 +94,12 @@ const {
     <!-- 新規入力モード -->
     <template v-else>
       <RecordSession @add-session="handleAddSession" />
+      <div class="ai-coach-btn-wrapper">
+        <Button text="AIコーチに相談" color="secondary" @click-button="openAiCoachDialog" />
+      </div>
     </template>
   </div>
+  <AiCoachDialog v-model="isAiCoachDialogOpen" />
 </template>
 
 <style scoped>
@@ -158,5 +165,9 @@ const {
   text-align: left;
   font-size: 0.9rem;
   line-height: 1.6;
+}
+
+.ai-coach-btn-wrapper {
+  padding: 8px 0;
 }
 </style>
