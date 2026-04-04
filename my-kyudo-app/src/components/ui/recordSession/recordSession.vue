@@ -90,7 +90,7 @@ const isEditMode = !!props.editSession;
             <v-btn
               v-for="(arrow, aIndex) in stand.arrows"
               :key="aIndex"
-              :color="arrow.hit ? 'success' : arrow.position ? 'error' : undefined"
+              :color="arrow.hit ? 'success' : arrow.position ? 'error' : 'primary'"
               :variant="arrow.hit || arrow.position ? 'flat' : 'outlined'"
               class="arrow-btn"
               @click="openDialog(sIndex, aIndex)"
