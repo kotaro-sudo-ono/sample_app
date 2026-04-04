@@ -2,6 +2,7 @@
 import DialogTemplate from '@/components/ui/dialogTemplate/DialogTemplate.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { useAiCoachDialog } from './composable';
+import { getTypeName, type PracticeType } from '@/types/practiceType';
 
 const open = defineModel<boolean>({ default: false });
 
@@ -48,7 +49,7 @@ const {
               <span class="session-info">
                 {{ session.date.substring(0, 10) }}
                 &nbsp;|&nbsp;
-                {{ session.sessionTypeId === 1 ? '練習' : session.sessionTypeId === 2 ? '大会' : session.sessionTypeId === 3 ? '審査' : 'その他' }}
+                {{ getTypeName(session.sessionTypeId as PracticeType) }}
                 &nbsp;|&nbsp;
                 {{ session.totalHits }}/{{ session.totalArrows }}中
                 （{{ session.totalArrows > 0 ? Math.round((session.totalHits / session.totalArrows) * 100) : 0 }}%）
