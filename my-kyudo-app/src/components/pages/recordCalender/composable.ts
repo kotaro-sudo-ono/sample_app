@@ -46,7 +46,9 @@ export const useRecordCalender = (initialMonth?: string) => {
   });
 
   const selectedSessions = computed<PracticeSession[]>(() => {
-    if (!selectedDate.value) return [];
+    if (!selectedDate.value) {
+      return [];
+    }
     return store.getSessionsByDate(selectedDate.value);
   });
 
@@ -78,14 +80,18 @@ export const useRecordCalender = (initialMonth?: string) => {
   };
 
   const formatAccuracy = (session: PracticeSession) => {
-    if (session.totalArrows === 0) return '0.0';
+    if (session.totalArrows === 0) {
+      return '0.0';
+    }
     return ((session.totalHits / session.totalArrows) * 100).toFixed(1);
   };
 
   const getUserId = (): string | null => {
     const auth = authStore();
     const token = auth.token;
-    if (!token) return null;
+    if (!token) {
+      return null;
+    }
     try {
       const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
       const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');

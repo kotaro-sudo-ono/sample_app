@@ -70,7 +70,9 @@ export const practiceStore = defineStore('practice', {
       const totalArrows = updated.stands.reduce((sum, stand) => sum + stand.arrows.length, 0);
       const totalHits = updated.stands.reduce((sum, stand) => sum + stand.arrows.filter((arrow) => arrow.hit).length, 0);
       const index = this.sessions.findIndex((session) => session.id === updated.id);
-      if (index === -1) return;
+      if (index === -1) {
+        return;
+      }
       const previous = this.sessions[index];
       this.sessions[index] = { ...updated, totalArrows, totalHits };
       this.syncUpdateToBackend({ ...updated, totalArrows, totalHits }, previous);
@@ -165,17 +167,23 @@ export const practiceStore = defineStore('practice', {
             .filter((record) => record.recordId)
             .map((record) => {
               const stands: Stand[] = (() => {
-                if (!record.arrows || record.arrows.length === 0) return [];
+                if (!record.arrows || record.arrows.length === 0) {
+                  return [];
+                }
                 const standMap = new Map<number, Arrow[]>();
                 const sortedArrows = [...record.arrows].sort((a, b) => {
                   const snA = a.standNumber ?? 1;
                   const snB = b.standNumber ?? 1;
-                  if (snA !== snB) return snA - snB;
+                  if (snA !== snB) {
+                    return snA - snB;
+                  }
                   return a.arrowNumber - b.arrowNumber;
                 });
                 for (const arrow of sortedArrows) {
                   const sn = arrow.standNumber ?? 1;
-                  if (!standMap.has(sn)) standMap.set(sn, []);
+                  if (!standMap.has(sn)) {
+                    standMap.set(sn, []);
+                  }
                   standMap.get(sn)!.push({
                     hit: arrow.hit,
                     position:

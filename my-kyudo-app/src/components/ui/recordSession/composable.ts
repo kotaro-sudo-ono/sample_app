@@ -78,7 +78,9 @@ export const useRecordSession = (emit: SessionEmit, editSession?: PracticeSessio
   };
 
   watch(dialogOpen, (isOpen) => {
-    if (!isOpen) selectedArrow.value = undefined;
+    if (!isOpen) {
+      selectedArrow.value = undefined;
+    }
   });
 
   const openDialog = (standIndex: number, arrowIndex: number) => {
@@ -94,7 +96,9 @@ export const useRecordSession = (emit: SessionEmit, editSession?: PracticeSessio
   };
 
   const handleSelectPosition = (pos?: { x: number; y: number }) => {
-    if (!selectedArrow.value) return;
+    if (!selectedArrow.value) {
+      return;
+    }
     const { standIndex, arrowIndex } = selectedArrow.value;
     const s = [...stands.value];
     s[standIndex].arrows[arrowIndex] = {

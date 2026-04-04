@@ -8,7 +8,9 @@ export const useRecordHits = (sessionId?: string) => {
 
   const editingSession = computed<PracticeSession | undefined>(() => {
     const session = store.getSessions.find((s) => s.id === sessionId);
-    if (!session) return undefined;
+    if (!session) {
+      return undefined;
+    }
     const stands = session.stands.filter((stand) =>
       stand.arrows.some((arrow) => arrow.hit || arrow.position !== undefined)
     );
@@ -61,7 +63,9 @@ export const useRecordHits = (sessionId?: string) => {
   };
 
   const handleDiagnose = async () => {
-    if (!editingSession.value || selectedStandIndices.value.length === 0) return;
+    if (!editingSession.value || selectedStandIndices.value.length === 0) {
+      return;
+    }
     const filteredStands = selectedStandIndices.value
       .slice()
       .sort((a, b) => a - b)
