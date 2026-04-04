@@ -34,7 +34,7 @@ const isButtonDisabled = computed(() => {
 
         <v-divider class="my-4" />
 
-        <v-form class="auth-form">
+        <v-form class="auth-form" @submit.prevent="submitForm">
           <v-text-field
             clearable
             prepend-inner-icon="mdi-email-outline"
