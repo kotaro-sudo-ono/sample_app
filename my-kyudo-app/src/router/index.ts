@@ -14,7 +14,16 @@ const router = createRouter({
     { path: '/signIn', name: 'signIn', component: SignIn, meta: { hideAppBar: true } },
     { path: '/signUp', name: 'signUp', component: signUp, meta: { hideAppBar: true } },
     { path: '/homeDashboard/recordCalender', name: 'recordCalender', component: recordCalender },
-    { path: '/homeDashboard/recordHits', name: 'recordHits', component: recordHits, props: (route) => ({ sessionId: route.query.sessionId as string | undefined }) },
+    {
+      path: '/homeDashboard/recordHits',
+      name: 'recordHits',
+      component: recordHits,
+      props: (route) => {
+        const raw = route.query.sessionId;
+        const sessionId = Array.isArray(raw) ? raw[0] ?? undefined : typeof raw === 'string' ? raw : undefined;
+        return { sessionId };
+      },
+    },
     { path: '/homeDashboard/recordHistory', name: 'recordHistory', component: recordHistory },
   ],
 });
