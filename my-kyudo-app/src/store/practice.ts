@@ -1,4 +1,12 @@
 import { defineStore } from 'pinia';
+
+const generateUUID = (): string => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (character) => {
+    const random = (Math.random() * 16) | 0;
+    const value = character === 'x' ? random : (random & 0x3) | 0x8;
+    return value.toString(16);
+  });
+};
 import { saveRecord, updateRecord, fetchRecordsByUser, type SaveArrow, type ArrowRecord } from '@/API/record/recordApi';
 import { authStore } from '@/store/auth';
 import { notificationStore } from '@/store/notification';
@@ -53,7 +61,7 @@ export const practiceStore = defineStore('practice', {
 
       const newSession: PracticeSession = {
         ...session,
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         totalArrows,
         totalHits,
       };
