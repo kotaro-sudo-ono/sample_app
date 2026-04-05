@@ -2,7 +2,7 @@ import axios from 'axios';
 import { authStore } from '@/store/auth';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:8082',
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8082',
 });
 
 // リクエストごとに最新の JWT を自動でヘッダーに付ける

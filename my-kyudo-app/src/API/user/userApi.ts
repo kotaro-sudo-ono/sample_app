@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { api } from '@/shared/api/api';
 
 type LoginResponse = {
@@ -10,5 +9,5 @@ export const login = (email: string, password: string) => {
 };
 
 export const register = (email: string, name: string, password: string) => {
-  return axios.post('http://localhost:8081/user/register', { email, name, password });
+  return api.post('/user/register', { email, name, password });
 };

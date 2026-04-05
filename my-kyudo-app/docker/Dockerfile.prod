@@ -1,0 +1,22 @@
+FROM node:23.7.0 AS builder
+
+WORKDIR /app
+
+COPY package.json yarn.lock ./
+RUN yarn install
+
+COPY src/ ./src/
+COPY index.html vite.config.ts tsconfig.json shims-vue.d.ts ./
+COPY .prettierrc .eslintrc.ts .eslintignore .prettierignore ./
+
+ARG VITE_API_BASE_URL
+ARG VITE_GOOGLE_AI_API_KEY
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_GOOGLE_AI_API_KEY=$VITE_GOOGLE_AI_API_KEY
+
+RUN yarn build
+
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
